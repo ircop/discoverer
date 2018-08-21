@@ -2,6 +2,8 @@
 
 Little framework for network equipment universal iteraction, in pre-pre-pre-pre-alpha stage :)
 
+Idea and some regexps was taken from [NocProject](https://nocproject.org)
+
 The point is networking automation. You can call same functions for any equipment and become structured result (or error :) )
 
 Currently supported equipment are D-Link and Cisco.
