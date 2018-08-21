@@ -1,0 +1,4 @@
+*.go linguist-language=Go
+*/*.go linguist-language=Go
+*/*/*.go linguist-language=Go
+

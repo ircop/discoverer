@@ -12,9 +12,9 @@ type Profile interface {
 	SetCallbacks() (error)
 	SetPrompt()
 
-	GetPlatform() (Platform, error)					// dlink|cisco
+	GetPlatform() (Platform, error)					// dlink|cisco|mes
+	GetInterfaces() (map[string]Interface, error)	// dlink|cisco|mes
 	GetLldp() ([]LldpNeighborship, error)			// dlink|cisco
-	GetInterfaces() (map[string]Interface, error)	// dlink|cisco
 	GetVlans() ([]Vlan, error)						// dlink|cisco
 	GetIps() ([]IPInterface, error)					// dlink|cisco
 	GetConfig() (string, error)						// dlink|cisco
