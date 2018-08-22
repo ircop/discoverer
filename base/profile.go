@@ -14,8 +14,8 @@ type Profile interface {
 
 	GetPlatform() (Platform, error)					// dlink|cisco|mes
 	GetInterfaces() (map[string]Interface, error)	// dlink|cisco|mes
-	GetLldp() ([]LldpNeighborship, error)			// dlink|cisco
-	GetVlans() ([]Vlan, error)						// dlink|cisco
+	GetLldp() ([]LldpNeighborship, error)			// dlink|cisco|mes
+	GetVlans() ([]Vlan, error)						// dlink|cisco|mes
 	GetIps() ([]IPInterface, error)					// dlink|cisco
 	GetConfig() (string, error)						// dlink|cisco
 	GetUplink() (string, error)						// dlink|cisco
