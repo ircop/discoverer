@@ -2,7 +2,71 @@ package text
 
 import (
 	"testing"
+	"fmt"
 )
+
+func Test_ParseShVlanMES(t *testing.T) {
+	output := `show vlan
+Vlan mode: Basic
+Created by: D-Default, S-Static, G-GVRP, R-Radius Assigned VLAN, V-Voice VLAN
+
+show vlan
+Vlan mode: Basic
+Created by: D-Default, S-Static, G-GVRP, R-Radius Assigned VLAN, V-Voice VLAN
+
+Vlan       Name           Tagged Ports      UnTagged Ports      Created by
+---- ----------------- ------------------ ------------------ ----------------
+ 1           -                            gi2/0/1-24,               D        
+                                          te2/0/1-4,                         
+                                          gi3/0/1-24,                         
+                                          te3/0/1-4,                         
+                                          gi4/0/1-24,                         
+                                          te4/0/1-4,                         
+                                          gi5/0/1-24,                         
+                                          te5/0/1-4,                         
+                                          gi6/0/1-24,                         
+                                          te6/0/1-4,                         
+                                          gi7/0/1-24,
+                                          te7/0/1-4,
+                                          gi8/0/1-24,
+                                          te8/0/1-4,Po2-16
+999          -          te1/0/1,te1/0/4                             S
+1108         -          te1/0/1,te1/0/4                             S
+1149         -          te1/0/1,te1/0/4       gi1/0/1-24            S
+3380         -          te1/0/1,te1/0/4                             S
+3382         -          te1/0/1,te1/0/4                             S
+3383         -          te1/0/1,te1/0/4       gi1/0/1-24            S
+3384         -          te1/0/1,te1/0/4                             S
+3385         -          te1/0/1,te1/0/4                             S
+3406         -          te1/0/1,te1/0/4                             S
+3408         -          te1/0/1,te1/0/4                             S
+3438         -          te1/0/1,te1/0/4                             S
+3446         -          te1/0/1,te1/0/4                             S
+3447         -          te1/0/1,te1/0/4                             S
+
+
+
+`
+	//rows := ParseTable(output, `^---`, "")
+	rows := ParseTable(output, "^--", "")
+	if len(rows) != 14 {
+		t.Fatal("Row count should be 14")
+	}
+
+	if rows[0][0] != "1" {
+		t.Fatalf("Row 0 col 0 should be '1', got '%s'", rows[0][0])
+	}
+	if rows[0][1] != "-" {
+		t.Fatalf("Row 0 col 1 should be '1', got '%s'", rows[0][1])
+	}
+	if rows[0][2] != "" {
+		t.Fatalf("Row 0 col 2 should be '1', got '%s'", rows[0][2])
+	}
+
+	fmt.Printf("%+v\n", rows[0][3])
+
+	fmt.Printf("-\n")
+}
 
 func Test_ParseShIntStatus(t *testing.T) {
 	output := `sh int status

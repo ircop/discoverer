@@ -71,13 +71,14 @@ func ParseTable(t string, header string, footer string) [][]string {
 				rows = append(rows, cols)
 				continue
 			}
-			// empty first column. Loop trough all rows, append cur to prev row
+			// cols[0] == "" empty first column. Loop trough all rows, append cur to prev row
 			// if there is no prev.row, we don't know what to do
 			if len(rows) == 0 {
 				continue
 			}
 			lastRowIdx := len(rows)-1
 			for i := range cols {
+				//cols[i] = strings.TrimRight(cols[i], " ")
 				rows[lastRowIdx][i] += cols[i]
 			}
 		}
@@ -117,6 +118,7 @@ func parseLine(line string, columnLengths []int64) []string {
 		// col lenght is more then chars left. Append existing chars and strip them.
 		if colLen >= int64(len(chars)) {
 			col := strings.Join(chars, "")
+			col = strings.TrimRight(col,  " ")
 			cols = append(cols, col)
 			chars = make([]string, 0)
 			continue
@@ -125,6 +127,7 @@ func parseLine(line string, columnLengths []int64) []string {
 		// If this is last column, append all chars and break
 		if colIdx == len(columnLengths) - 1 {
 			col := strings.Join(chars, "")
+			col = strings.TrimRight(col, " ")
 			cols = append(cols, col)
 			break
 		}
@@ -142,6 +145,7 @@ func parseLine(line string, columnLengths []int64) []string {
 
 func parseHeader(header string) []int64 {
 	columns := make([]int64, 0)
+	header = strings.TrimRight(header, " ")
 
 	header = strings.Trim(header, "\n")
 	var curColumn int64
