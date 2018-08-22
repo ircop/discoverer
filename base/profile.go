@@ -16,9 +16,9 @@ type Profile interface {
 	GetInterfaces() (map[string]Interface, error)	// dlink|cisco|mes
 	GetLldp() ([]LldpNeighborship, error)			// dlink|cisco|mes
 	GetVlans() ([]Vlan, error)						// dlink|cisco|mes
-	GetIps() ([]IPInterface, error)					// dlink|cisco
-	GetConfig() (string, error)						// dlink|cisco
-	GetUplink() (string, error)						// dlink|cisco
+	GetIps() ([]IPInterface, error)					// dlink|cisco|mes
+	GetConfig() (string, error)						// dlink|cisco|mes
+	GetUplink() (string, error)						// dlink|cisco|mes
 
 	SetLogger(func(string, ...interface{}))
 	SetDebugLogger(func(string, ...interface{}))

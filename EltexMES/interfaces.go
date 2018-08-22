@@ -4,6 +4,8 @@ import (
 	"github.com/ircop/discoverer/base"
 	"fmt"
 	"strings"
+	"github.com/ircop/discoverer/util/text"
+	"regexp"
 )
 
 // GetInterfaces for EltexMES profile
@@ -75,6 +77,48 @@ func (p *Profile) GetInterfaces() (map[string]discoverer.Interface, error) {
 			Shortname:ifname,
 			Type:discoverer.IntTypeAggregated,
 			PoMembers:iflist,
+		}
+		interfaces[ifname] = iface
+	}
+
+	// And L3 interfaces (svi's)
+	result, err = p.Cli.Cmd("sh ip interface")
+	if err != nil {
+		return interfaces, fmt.Errorf("Cannot 'sh ip interface': %s", err.Error())
+	}
+	p.Debug(result)
+
+	// some models shows both IP and GW tables; GW first. Cut it
+	reIfHeader, err := regexp.Compile(`IP Address\s+I\/F\s+`)
+	if err != nil {
+		return interfaces, fmt.Errorf("Cannot compile ip/gw split regex: %s", reIfHeader)
+	}
+	parts := reIfHeader.Split(result, -1)
+	if len(parts) < 2 {
+		p.Log("Cannot split ip/gw tables: split result: %d", len(parts))
+	}
+	result = parts[1]
+
+	rows := text.ParseTable(result, "^--", "")
+	reSvi, err := regexp.Compile(`vlan\s\d+`)
+	if err != nil {
+		return interfaces, fmt.Errorf("Cannot compile svi regex")
+	}
+
+	for _, row := range rows {
+		if len(row) < 4 {
+			continue
+		}
+
+		ifname := strings.Trim(row[1], " ")
+		if !reSvi.Match([]byte(ifname)) {
+			continue
+		}
+		ifname = strings.Replace(ifname, " ", "", -1)
+		iface := discoverer.Interface{
+			Name: ifname,
+			Shortname: ifname,
+			Type:discoverer.IntTypeSvi,
 		}
 		interfaces[ifname] = iface
 	}

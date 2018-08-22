@@ -138,7 +138,7 @@ func (p *Generic) ExpandInterfaceRange(ifstring string) []string {
 				}
 				stopStr = out["num"]
 				if "" == startStr || "" == stopStr {
-					p.Log("ExpandInterfaceRange: start/stop interfaces are empty ('%s'|'%s')", startStr, stopStr)
+					p.Log("ExpandInterfaceRange: start/stop interfaces are empty ('%s'|'%s') (string given: '%s')", startStr, stopStr, ifstring)
 					continue
 				}
 			}

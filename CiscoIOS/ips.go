@@ -50,6 +50,9 @@ func (p *Profile) GetIps() ([]discoverer.IPInterface, error) {
 			}
 			maskString := fmt.Sprintf("%d.%d.%d.%d", ipnet.Mask[0], ipnet.Mask[1], ipnet.Mask[2], ipnet.Mask[3])
 			mask := net.ParseIP(maskString)
+			if mask == nil {
+				continue
+			}
 			intf := discoverer.IPInterface{
 				Interface:ifname,
 				IP:ip,

@@ -19,6 +19,9 @@ func (p *Profile) GetLldp() ([]discoverer.LldpNeighborship, error) {
 
 	rows := text.ParseTable(result, "^-----", "")
 	for _, row := range rows {
+		if len(row) < 3 {
+			continue
+		}
 		ifname := row[0]
 		cid := row[1]
 		pid := row[2]

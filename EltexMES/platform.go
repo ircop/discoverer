@@ -64,5 +64,8 @@ func (p *Profile) GetPlatform() (discoverer.Platform, error) {
 		platform.Serial = strings.Trim(out["serial2"], " ")
 	}
 
+	p.Version = platform.Version
+	p.Model = platform.Model
+
 	return platform, nil
 }
