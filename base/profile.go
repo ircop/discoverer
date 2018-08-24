@@ -12,13 +12,13 @@ type Profile interface {
 	SetCallbacks() (error)
 	SetPrompt()
 
-	GetPlatform() (Platform, error)					// dlink|cisco|mes
-	GetInterfaces() (map[string]Interface, error)	// dlink|cisco|mes
-	GetLldp() ([]LldpNeighborship, error)			// dlink|cisco|mes
-	GetVlans() ([]Vlan, error)						// dlink|cisco|mes
-	GetIps() ([]IPInterface, error)					// dlink|cisco|mes
-	GetConfig() (string, error)						// dlink|cisco|mes
+	GetPlatform() (Platform, error)					// dlink|cisco|mes|3100
+	GetInterfaces() (map[string]Interface, error)	// dlink|cisco|mes|3100
+	GetLldp() ([]LldpNeighbor, error)				// dlink|cisco|mes|3100
+	GetVlans() ([]Vlan, error)						// dlink|cisco|mes|3100
+	GetIps() ([]IPInterface, error)					// dlink|cisco|mes|3100
 	GetUplink() (string, error)						// dlink|cisco|mes
+	GetConfig() (string, error)						// dlink|cisco|mes
 
 	SetLogger(func(string, ...interface{}))
 	SetDebugLogger(func(string, ...interface{}))

@@ -85,6 +85,7 @@ ExpandInterfaceRange func
  * "Gi 1/1-3,Gi 1/7" -> ["Gi 1/1", "Gi 1/2", "Gi 1/3", "Gi 1/7"]
  * "1:1-3" -> ["1:1", "1:2", "1:3"]
  * "1:1-1:3" -> ["1:1", "1:2", "1:3"]
+ * todo: something like 1:(1,3-24)
  */
 func (p *Generic) ExpandInterfaceRange(ifstring string) []string {
 	result := make([]string,0)
@@ -93,6 +94,20 @@ func (p *Generic) ExpandInterfaceRange(ifstring string) []string {
 	if err != nil {
 		p.Log("ExpandInterfaceRange: cannot compile interface prefix regexp: %s", err.Error())
 		return result
+	}
+
+	// dgs3100 style: 1:(3,4,5-8)
+	prefix2 := ""
+	rePrefix2, err := regexp.Compile(`^(?P<prefix>\d+):\((?P<ports>[^\)]+)\)$`)
+	if err != nil {
+		p.Log("ExpandInterfaceRange: cannot compile interface prefix2 regexp: %s", err.Error())
+		return result
+	}
+
+	if rePrefix2.Match([]byte(ifstring)) {
+		out := p.ParseSingle(rePrefix2, ifstring)
+		ifstring = strings.Trim(out["ports"], " ")
+		prefix2 = strings.Trim(out["prefix"], " ")
 	}
 
 
@@ -160,6 +175,12 @@ func (p *Generic) ExpandInterfaceRange(ifstring string) []string {
 			}
 		} else {
 			result = append(result, x)
+		}
+	}
+
+	if prefix2 != "" {
+		for i := range result {
+			result[i] = prefix2 + ":" + result[i]
 		}
 	}
 

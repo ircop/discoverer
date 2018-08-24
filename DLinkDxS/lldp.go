@@ -10,9 +10,9 @@ import (
 )
 
 // GetLldp for DLinkDxS profile
-func (p *Profile) GetLldp() ([]discoverer.LldpNeighborship, error) {
+func (p *Profile) GetLldp() ([]discoverer.LldpNeighbor, error) {
 	p.Debug("starting DLinkDxS.GetLldp()")
-	neighbors := make([]discoverer.LldpNeighborship, 0)
+	neighbors := make([]discoverer.LldpNeighbor, 0)
 
 	out, err := p.Cli.Cmd("show lldp remote_ports mode normal")
 	if err != nil {
@@ -48,14 +48,10 @@ func (p *Profile) GetLldp() ([]discoverer.LldpNeighborship, error) {
 			continue
 		}
 
-		item := discoverer.LldpNeighborship{
-			PortName:portName,
-		}
-
 		// parse entities for current port
 		entities := p.ParseMultiple(reEntity, port)
 		p.Debug("Found %d entities on port %s", len(entities), portName)
-		members := make([]discoverer.LldpNeighbor, 0)
+		//members := make([]discoverer.LldpNeighbor, 0)
 		for _, ent := range entities {
 			cid := strings.Trim(ent["chassis_id"], " ")
 			pid := strings.Trim(ent["port_id"], " ")
@@ -63,14 +59,11 @@ func (p *Profile) GetLldp() ([]discoverer.LldpNeighborship, error) {
 				p.Log("Error: %s: no chassis id or port id (%s/%s)", portName, cid, pid)
 				continue
 			}
-			member := discoverer.LldpNeighbor{
+			item := discoverer.LldpNeighbor{
+				LocalPort:portName,
 				ChassisID:cid,
 				PortID:pid,
 			}
-			members = append(members, member)
-		}
-		if len(members) > 0 {
-			item.Members = members
 			neighbors = append(neighbors, item)
 		}
 	}

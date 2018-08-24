@@ -7,9 +7,9 @@ import (
 )
 
 // GetLldp for CiscoIOS profile
-func (p *Profile) GetLldp() ([]discoverer.LldpNeighborship, error) {
+func (p *Profile) GetLldp() ([]discoverer.LldpNeighbor, error) {
 	p.Debug("starting CiscoIOS.GetLldp()")
-	neighbors := make([]discoverer.LldpNeighborship, 0)
+	neighbors := make([]discoverer.LldpNeighbor, 0)
 
 	out, err := p.Cli.Cmd("show lldp neighbors")
 	if err != nil {
@@ -60,13 +60,12 @@ func (p *Profile) GetLldp() ([]discoverer.LldpNeighborship, error) {
 			continue
 		}
 
-		item := discoverer.LldpNeighborship{
-			PortName:local,
-		}
-		members := make([]discoverer.LldpNeighbor,0)
-		members = append(members, discoverer.LldpNeighbor{ChassisID:cid,PortID:pid})
-		item.Members = members
 
+		item := discoverer.LldpNeighbor{
+			LocalPort: local,
+			ChassisID: cid,
+			PortID: pid,
+		}
 		neighbors = append(neighbors, item)
 	}
 
