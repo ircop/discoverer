@@ -99,7 +99,7 @@ func (p *Profile) GetInterfaces() (map[string]discoverer.Interface, error) {
 	}
 	result = parts[1]
 
-	rows := text.ParseTable(result, "^--", "")
+	rows := text.ParseTable(result, "^--", "", false)
 	reSvi, err := regexp.Compile(`vlan\s\d+`)
 	if err != nil {
 		return interfaces, fmt.Errorf("Cannot compile svi regex")

@@ -10,6 +10,7 @@ import (
 	"strconv"
 )
 
+// GetPlatform for IOS
 func (p *Profile) GetPlatform() (discoverer.Platform, error) {
 	p.Debug("Starting CiscoIOS.GetPlatform()")
 	var platform discoverer.Platform

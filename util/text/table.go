@@ -20,7 +20,7 @@ import (
 // t: text to parse
 // header: header matching regex
 // footer: footer matching regex
-func ParseTable(t string, header string, footer string) [][]string {
+func ParseTable(t string, header string, footer string, exceeding bool) [][]string {
 	rows := make([][]string, 0)
 
 	// we NEED a header regex
@@ -63,7 +63,7 @@ func ParseTable(t string, header string, footer string) [][]string {
 				break
 			}
 
-			cols := parseLine(line, columnsLengths)
+			cols := parseLine(line, columnsLengths, exceeding)
 			// assuming first column is always non-empty...
 			// If it's empty, we assuming this is continuous previous row
 			cols[0] = strings.Trim(cols[0], " ")
@@ -104,11 +104,33 @@ func ParseTable(t string, header string, footer string) [][]string {
 	return rows
 }
 
-func parseLine(line string, columnLengths []int64) []string {
+func parseLine(line string, columnLengths []int64, exceeding bool) []string {
 	cols := make([]string, 0)
 
 	chars := strings.Split(line, "")
 	for colIdx, colLen := range columnLengths {
+
+		// todo: if LAST char of prev. column is NOT space + if FIRST char of current column is NOT space --> extending prev. column
+		if len(chars) > 0 && colIdx > 0 && exceeding { // make multiple IF's to avoid unreadability :)
+			prev := cols[colIdx-1]
+			if len(prev) > 0 && prev[len(prev)-1:] != " " {
+				//fmt.Printf("LAST NOT SPACE: '%s'\n", prev)
+				//fmt.Printf("CUR CHARS: '%s'\n", chars)
+
+				// last char of previous column is not space.
+				// We should read current chars up to space and add this to prev. line
+				for i := 0; i < len(chars); i++ {
+					if chars[i] != " " {
+						cols[colIdx-1] += chars[i]
+						chars = chars[1:]
+						i--
+					} else {
+						break
+					}
+				}
+			}
+		}
+
 		// no chars left, add empty column
 		if len(chars) == 0 {
 			cols = append(cols, "")
@@ -118,7 +140,7 @@ func parseLine(line string, columnLengths []int64) []string {
 		// col lenght is more then chars left. Append existing chars and strip them.
 		if colLen >= int64(len(chars)) {
 			col := strings.Join(chars, "")
-			col = strings.TrimRight(col,  " ")
+			//col = strings.TrimRight(col,  " ")
 			cols = append(cols, col)
 			chars = make([]string, 0)
 			continue
@@ -127,7 +149,7 @@ func parseLine(line string, columnLengths []int64) []string {
 		// If this is last column, append all chars and break
 		if colIdx == len(columnLengths) - 1 {
 			col := strings.Join(chars, "")
-			col = strings.TrimRight(col, " ")
+			//col = strings.TrimRight(col, " ")
 			cols = append(cols, col)
 			break
 		}
@@ -135,9 +157,13 @@ func parseLine(line string, columnLengths []int64) []string {
 		// we have enough chars, append colLen chars to columns
 		col := strings.Join(chars[:colLen], "")
 		// we should NOT tim first spaces, but should trim last ones
-		col = strings.TrimRight(col, " ")
+		//col = strings.TrimRight(col, " ")
 		cols = append(cols, col)
 		chars = chars[colLen:]
+	}
+
+	for i, _ := range cols {
+		cols[i] = strings.TrimRight(cols[i], " ")
 	}
 
 	return cols

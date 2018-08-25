@@ -2,8 +2,57 @@ package text
 
 import (
 	"testing"
-	"fmt"
 )
+
+func Test_JunRightChar(t *testing.T) {
+	// Junos 'sh int terse' column 'eth-switch' last char 'h' is going to next column. Test this
+	output := ` show interfaces terse
+Interface               Admin Link Proto    Local                 Remote
+xe-0/0/0                up    up
+xe-0/0/0.0              up    up   aenet    --> ae6.0
+xe-0/0/1                up    up
+xe-0/0/1.0              up    up   eth-switch sdf
+xe-0/0/2                up    up
+xe-0/0/2.0              up    up   eth-switch
+xe-0/0/3                up    up
+xe-0/0/3.0              up    up   aenet    --> ae6.0
+xe-0/0/4                up    up
+xe-0/0/4.0              up    up   aenet    --> ae6.0
+xe-0/0/5                up    up
+xe-0/0/5.0              up    up   aenet    --> ae6.0
+xe-0/0/6                up    up
+xe-0/0/6.0              up    up   aenet    --> ae0.0
+xe-0/0/7                up    up
+xe-0/0/7.0              up    up   aenet    --> ae0.0
+xe-0/0/8                up    up
+xe-0/0/8.0              up    up   aenet    --> ae8.0
+xe-0/0/9                up    up
+`
+	rows := ParseTable(output, `Interface\s+`, "", true)
+
+	/*for _, row := range rows {
+		for _, col := range row {
+			fmt.Printf("'%s'\t", col)
+		}
+		fmt.Printf("\n")
+	}*/
+
+	if len(rows) != 19 {
+		t.Fatal("Should be 19 rows")
+	}
+	if rows[3][3] != "eth-switch" {
+		t.Fatalf("row 3 col 3: expected 'eth-switch', got '%s'", rows[3][3])
+	}
+	if rows[3][4] != "sdf" {
+		t.Fatalf("row 3 col 4: expected 'sdf', got '%s'", rows[3][4])
+	}
+	if rows[5][3] != "eth-switch" {
+		t.Fatalf("row 5 col 3: expected 'eth-switch', got '%s'", rows[5][3])
+	}
+	if rows[5][4] != "" {
+		t.Fatalf("row 5 col 4: expected '', got '%s'", rows[5][4])
+	}
+}
 
 func Test_ParseShVlanMES(t *testing.T) {
 	output := `show vlan
@@ -48,7 +97,7 @@ Vlan       Name           Tagged Ports      UnTagged Ports      Created by
 
 `
 	//rows := ParseTable(output, `^---`, "")
-	rows := ParseTable(output, "^--", "")
+	rows := ParseTable(output, "^--", "", false)
 	if len(rows) != 14 {
 		t.Fatal("Row count should be 14")
 	}
@@ -57,15 +106,15 @@ Vlan       Name           Tagged Ports      UnTagged Ports      Created by
 		t.Fatalf("Row 0 col 0 should be '1', got '%s'", rows[0][0])
 	}
 	if rows[0][1] != "-" {
-		t.Fatalf("Row 0 col 1 should be '1', got '%s'", rows[0][1])
+		t.Fatalf("Row 0 col 1 should be '-', got '%s'", rows[0][1])
 	}
 	if rows[0][2] != "" {
-		t.Fatalf("Row 0 col 2 should be '1', got '%s'", rows[0][2])
+		t.Fatalf("Row 0 col 2 should be '', got '%s'", rows[0][2])
 	}
 
-	fmt.Printf("%+v\n", rows[0][3])
+/*	fmt.Printf("%+v\n", rows[0][3])
 
-	fmt.Printf("-\n")
+	fmt.Printf("-\n")*/
 }
 
 func Test_ParseShIntStatus(t *testing.T) {
@@ -110,7 +159,7 @@ Po5       DXS-112.10         connected    trunk      a-full a-1000
 
 `
 
-	rows := ParseTable(output, `^Port\s+Name`, "")
+	rows := ParseTable(output, `^Port\s+Name`, "", false)
 	if len(rows) != 35 {
 		t.Fatal("Row count should be 35")
 	}
@@ -155,7 +204,7 @@ te1/0/1   ac:f1:df:a4:ae:00 ac:f1:df:a4:a                        O        106
 te1/0/4   e0:d9:e3:ba:9e:80    te1/0/3                           O        100
 
 `
-	rows := ParseTable(output, `^-----`, "")
+	rows := ParseTable(output, `^-----`, "", false)
 
 /*	for i := range rows {
 		fmt.Printf("'%s|%s|%s|%s|%s|%s'\n", rows[i][0], rows[i][1],rows[i][2],rows[i][3],rows[i][4],rows[i][5])

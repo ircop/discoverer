@@ -37,7 +37,7 @@ func (p *Profile) GetIps() ([]discoverer.IPInterface, error) {
 		return ipifs, fmt.Errorf("Cannot compile svi regex")
 	}
 
-	rows := text.ParseTable(result, "^--", "")
+	rows := text.ParseTable(result, "^--", "", false)
 	for _, row := range rows {
 		if len(row) < 4 {
 			continue

@@ -21,7 +21,7 @@ import (
 	}
 	p.Debug(result)
 
-	rows := text.ParseTable(result, `^----`, "")
+	rows := text.ParseTable(result, `^----`, "", false)
 	for _, row := range rows {
 		if len(row) < 1 {
 			continue

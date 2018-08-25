@@ -60,7 +60,7 @@ func (p *Profile) GetInterfaces() (map[string]discoverer.Interface, error) {
 			Shortname: ifname,
 			Description: strings.Trim(port["desc"], " "),
 			Type:iftype,
-			LldpID:ifname,
+			LldpID:strings.Trim(port["ifname"], " "),
 		}
 		if iftype == discoverer.IntTypeAggregated {
 			if po, ok := pos[ifname]; ok {

@@ -19,11 +19,6 @@ func (p *Profile) SetPrompt() {
 	}
 }
 
-//func (p *Profile) Init() error {
-//	p.Cli.GlobalTimeout(60)
-//	return p.Cli.RegisterErrorPattern(`(% Invalid input detected at|% Ambiguous command|% Incomplete command|% Unknown command)`, "Invalid input")
-//}
-
 func (p *Profile) Init(cli *remote_cli.Cli, enable string, community string) error {
 	err := p.InitShared(cli, enable, community)
 	if err != nil {
