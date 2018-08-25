@@ -22,6 +22,8 @@ type Profile interface {
 
 	SetLogger(func(string, ...interface{}))
 	SetDebugLogger(func(string, ...interface{}))
+
+	Disconnect()
 }
 
 // Generic profile realization. Used for dummy functions, like 'not implemented, sorry'
@@ -29,7 +31,7 @@ type Profile interface {
 type Generic struct {
 	Profile
 	//device			discoverer.DeviceProfile
-	Cli				*remote_cli.Cli
+	Cli				remote_cli.CliInterface
 	Community		string
 
 	logger			func(string, ...interface{})
@@ -48,7 +50,7 @@ type Generic struct {
 
 // Init parses device profile contents, stores them, checks them.
 // 'enable' is enable password ; 'community' is community string - both are optional
-func (p *Generic) InitShared(cli *remote_cli.Cli, enable string, community string) error {
+func (p *Generic) InitShared(cli remote_cli.CliInterface, enable string, community string) error {
 	//p.device = device
 	p.Cli = cli
 	p.EnablePassword = enable
@@ -59,6 +61,7 @@ func (p *Generic) InitShared(cli *remote_cli.Cli, enable string, community strin
 		return fmt.Errorf("Both CLI type and SNMP community are not set!")
 	}
 
+
 	return nil
 }
 
@@ -67,9 +70,16 @@ func (p *Generic) SetEnable(pw string) {
 	p.EnablePassword = pw
 }
 
+// Disconnect cli
+func (p *Generic) Disconnect() {
+	if p.Cli != nil {
+		p.Cli.Close()
+	}
+}
+
 // Init dummy func
 // 'enable' is enable password ; 'community' is community string - both are optional
-func (p *Generic) Init(cli *remote_cli.Cli, enable string, community string) error {
+func (p *Generic) Init(cli remote_cli.CliInterface, enable string, community string) error {
 	return p.InitShared(cli, enable, community)
 }
 
