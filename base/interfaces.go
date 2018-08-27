@@ -57,14 +57,14 @@ func (p *Generic) GetInterfaces() (map[string]Interface, error) {
 // GetInterfaceType determines interface type by interface short name
 func (p *Generic) GetInterfaceType(ifname string) int {
 
-	if match, _ := regexp.Match(`^(fa|xe|ge|gi|te|et|wlan|sfp)`, []byte(strings.ToLower(ifname))); match {
+	if match, _ := regexp.Match(`^(fa|xe|ge|gi|te|et|wlan|sfp|ether)`, []byte(strings.ToLower(ifname))); match {
 		if strings.Contains(ifname, ".") {
 			return IntTypeSvi
 		}
 		return IntTypePhisycal
 	} else if match, _ := regexp.Match(`^(ae|po|bond|t\d+$)`, []byte(strings.ToLower(ifname))); match {
 		return IntTypeAggregated
-	} else if match, _ := regexp.Match(`^(vl|irb|bridg)`, []byte(strings.ToLower(ifname))); match {
+	} else if match, _ := regexp.Match(`^(vl|irb|bridg|vlan)`, []byte(strings.ToLower(ifname))); match {
 		return IntTypeSvi
 	} else if match, _ := regexp.Match(`^(lo)`, []byte(strings.ToLower(ifname))); match {
 		return IntTypeLoopback

@@ -12,8 +12,8 @@ type Profile interface {
 	SetCallbacks() (error)
 	SetPrompt()
 
-	GetPlatform() (Platform, error)					// dlink|cisco|mes|3100|jun
-	GetInterfaces() (map[string]Interface, error)	// dlink|cisco|mes|3100|jun
+	GetPlatform() (Platform, error)					// dlink|cisco|mes|3100|jun|mt
+	GetInterfaces() (map[string]Interface, error)	// dlink|cisco|mes|3100|jun|mt
 	GetLldp() ([]LldpNeighbor, error)				// dlink|cisco|mes|3100|jun
 	GetVlans() ([]Vlan, error)						// dlink|cisco|mes|3100|jun
 	GetIps() ([]IPInterface, error)					// dlink|cisco|mes|3100|jun
