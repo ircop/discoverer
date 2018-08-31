@@ -20,6 +20,8 @@ const (
 	IntTypeLoopback		= 5
 	// Mgmt
 	IntTypeManagement	= 6
+	// Nukk
+	IntTypeNull			= 7
 	// Unknown type of interface
 	IntTypeUnknown		= 100
 
@@ -57,21 +59,23 @@ func (p *Generic) GetInterfaces() (map[string]Interface, error) {
 // GetInterfaceType determines interface type by interface short name
 func (p *Generic) GetInterfaceType(ifname string) int {
 
-	if match, _ := regexp.Match(`^(fa|xe|ge|gi|te|et|wlan|sfp|ether)`, []byte(strings.ToLower(ifname))); match {
+	if match, _ := regexp.Match(`^(ae|eth-trunk|po|bond|t\d+$)`, []byte(strings.ToLower(ifname))); match{
+		return IntTypeAggregated
+	} else if match, _ := regexp.Match(`^(40|fa|xe|xg|ge|gi|te|et|wlan|sfp|ether)`, []byte(strings.ToLower(ifname))); match {
 		if strings.Contains(ifname, ".") {
 			return IntTypeSvi
 		}
 		return IntTypePhisycal
-	} else if match, _ := regexp.Match(`^(ae|po|bond|t\d+$)`, []byte(strings.ToLower(ifname))); match {
-		return IntTypeAggregated
 	} else if match, _ := regexp.Match(`^(vl|irb|bridg|vlan)`, []byte(strings.ToLower(ifname))); match {
 		return IntTypeSvi
 	} else if match, _ := regexp.Match(`^(lo)`, []byte(strings.ToLower(ifname))); match {
 		return IntTypeLoopback
-	} else if match, _ := regexp.Match(`^(fxp|mg)`, []byte(strings.ToLower(ifname))); match {
+	} else if match, _ := regexp.Match(`^(fxp|mg|meth)`, []byte(strings.ToLower(ifname))); match {
 		return IntTypeManagement
 	} else if match, _ := regexp.Match(`^(tun|ppp|l2t|pptp|ovpn|sstp|gre|ipip|eoip)`, []byte(strings.ToLower(ifname))); match {
 		return IntTypeTunnel
+	}  else if match, _ := regexp.Match(`^(null)`, []byte(strings.ToLower(ifname))); match {
+		return IntTypeNull
 	} else if match, _ := regexp.Match(`^(\d+(:\d+)?)$`, []byte(strings.ToLower(ifname))); match {
 		return IntTypePhisycal
 	}
