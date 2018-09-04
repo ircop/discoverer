@@ -1,0 +1,17 @@
+[nats]
+nats = true
+url = "nats://discoverer:password@127.0.0.1"
+tasks-chan = "tasks"
+reply-chan = "replies"
+
+[rpc]
+rpc = true
+listen-port = 8999
+listen-host = "0.0.0.0"
+ssl = true
+ssl-cert = "/etc/ssl/domain/domain.crt"
+ssl-key = "/etc/ssl/domain/domain.key"
+
+[log]
+dir = "/var/log/discoverer/"
+debug = true
