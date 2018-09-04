@@ -1,0 +1,45 @@
+syntax = "proto3";
+package dproto;
+
+enum PacketType {
+    ALL             = 0;
+    PLATFORM        = 1;
+    INTERFACES      = 2;
+    LLDP            = 3;
+    VLANS           = 4;
+    IPS             = 5;
+    UPLINK          = 6;
+    CONFIG          = 7;
+    ERROR           = 100;
+}
+
+enum ResponseType {
+    Error         = 0;
+}
+
+enum ProfileType {
+    DXS = 0;
+    DGS3100 = 10;
+    IOS = 20;
+    JUNOS = 30;
+    MES = 40;
+    HUA = 50;
+    ROUTEROS = 60;
+}
+
+enum Protocol {
+    TELNET = 0;
+    SSH = 1;
+}
+
+enum InterfaceType {
+    UNKNOWN     = 0;
+    PHISYCAL    = 1;
+    AGGREGATED  = 2;
+    SVI         = 3;
+    TUNNEL      = 4;
+    LOOPBACK    = 5;
+    MANAGEMENT  = 6;
+    NULL        = 7;
+}
+

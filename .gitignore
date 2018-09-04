@@ -1,1 +1,5 @@
 TODO.txt
+*.txt
+examples
+examples/*
+testing-web

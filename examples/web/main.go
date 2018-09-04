@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"net"
 	"strconv"
-	"github.com/ircop/discoverer/base"
-	"github.com/ircop/discoverer/DLinkDxS"
-	"github.com/ircop/discoverer/CiscoIOS"
+	"github.com/ircop/discoverer/profiles/base"
+	"github.com/ircop/discoverer/profiles/DLinkDxS"
+	"github.com/ircop/discoverer/profiles/CiscoIOS"
 	"encoding/json"
 	"github.com/ircop/remote-cli"
 )
@@ -23,8 +23,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	login := r.URL.Query().Get("login")
 	password := r.URL.Query().Get("password")
 	enable := r.URL.Query().Get("enable")
-	//enable := r.URL.Query().Get("enable")
-	protoStr := r.URL.Query().Get("proto")
+	protoStr := r.URL.Query().Get("dproto")
 	ip := r.URL.Query().Get("ip")
 	portStr := r.URL.Query().Get("port")
 	method := r.URL.Query().Get("method")
@@ -34,9 +33,9 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	w.Header().Set("Content-Type", "application/json")
 
-	// we need at lease login/pw/proto/ip/profile
+	// we need at lease login/pw/dproto/ip/profile
 	if login == "" || password == "" || protoStr == "" || ip == "" || portStr == "" || profile == "" || method == "" {
-		returnError(w, fmt.Sprintf("Some of login/password/proto/ip/profile is/are empty (%s/%s/%s/%s/%s/%s/%s)", login, password, protoStr, ip, portStr, profile, method) )
+		returnError(w, fmt.Sprintf("Some of login/password/dproto/ip/profile is/are empty (%s/%s/%s/%s/%s/%s/%s)", login, password, protoStr, ip, portStr, profile, method) )
 		return
 	}
 
@@ -64,7 +63,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		proto = discoverer.CliTypeSsh
 		break
 	default:
-		returnError(w, fmt.Sprintf("'proto' should be 'telnet' or 'ssh', not '%s'", protoStr))
+		returnError(w, fmt.Sprintf("'dproto' should be 'telnet' or 'ssh', not '%s'", protoStr))
 		return
 	}
 

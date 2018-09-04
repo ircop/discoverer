@@ -1,0 +1,18 @@
+syntax = "proto3";
+package dproto;
+
+import "dproto/types.proto";
+
+message TaskRequest {
+    string RequestID        = 1;
+    PacketType Type         = 2;
+    ProfileType Profile     = 3;
+    Protocol Proto          = 4;
+    string Host             = 5;
+    int32 Port              = 6;
+    string Login            = 7;
+    string Password         = 8;
+    string Enable           = 9;
+    int32 Timeout           = 10;
+    reserved 11 to 20;
+}

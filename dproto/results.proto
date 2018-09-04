@@ -1,0 +1,61 @@
+syntax = "proto3";
+package dproto;
+
+import "dproto/types.proto";
+
+// Platform is GetPlatform result
+message Platform {
+    // @inject_tag: json:"model,omitempty"
+    string Model            = 1;
+    // @inject_tag: json:"revision,omitempty"
+    string Revision         = 2;
+    // @inject_tag: json:"version,omitempty"
+    string Version          = 3;
+    // @inject_tag: json:"serial,omitempty"
+    string Serial           = 4;
+    // @inject_tag: json:"macs"
+    repeated string Macs    = 5;
+    reserved 6 to 10;
+}
+
+
+// Interface is for GetInterfaces() result
+message Interface {
+    // @inject_tag: json:"type,omitempty"
+    InterfaceType Type          = 1;
+    // @inject_tag: json:"name,omitempty"
+    string Name                 = 2;
+    // @inject_tag: json:"shortname,omitempty"
+    string Shortname            = 3;
+    // @inject_tag: json:"description,omitempty"
+    string Description          = 4;
+    // @inject_tag: json:"lldp_id,omitempty"
+    string LldpID               = 5;
+    // @inject_tag: json:"po_members,omitempty"
+    repeated string PoMembers   = 6;
+}
+
+// LldpNeighbor for GetLldp()
+message LldpNeighbor {
+    // @inject_tag: json:"local_port,omitempty"
+    string LocalPort        = 1;
+    // @inject_tag: json:"chassis_id,omitempty"
+    string ChassisID        = 2;
+    // @inject_tag: json:"port_id,omitempty"
+    string PortID           = 3;
+}
+
+// Vlan for GetVlans()
+message Vlan {
+    string Name                 = 1;
+    int64 ID                    = 2;
+    repeated string TrunkPorts  = 3;
+    repeated string AccessPorts = 4;
+}
+
+// Ipif is ip interface for GetIps()
+message Ipif {
+    string Interface        = 1;
+    string IP               = 2;
+    string Mask             = 3;
+}

@@ -1,0 +1,24 @@
+syntax = "proto3";
+package dproto;
+
+import "dproto/types.proto";
+import "dproto/results.proto";
+
+/*
+We will allways send same packet type, but it will differs by PacketType field.
+We will improve this when protobuf.Any will be supported on more platforms/languages.
+*/
+message Response {
+    PacketType Type                     = 1;
+
+    Platform platform                   = 2;
+    repeated Interface Interfaces       = 3;
+    repeated LldpNeighbor LldpNeighbors = 4;
+    repeated Vlan Vlans                 = 5;
+    repeated Ipif Ipifs                 = 6;
+    string Uplink                       = 7;
+    string Config                       = 8;
+    string Error                        = 100;
+
+    reserved 9 to 99;
+}
