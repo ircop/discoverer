@@ -14,19 +14,20 @@ type Profile interface {
 	SetPrompt()
 
 	GetPlatform() (dproto.Platform, error)					// dlink|cisco|mes|3100|jun|hua
-	GetInterfaces() (map[string]dproto.Interface, error)	// dlink|cisco|mes|3100|jun|hua
-	GetLldp() ([]dproto.LldpNeighbor, error)				// dlink|cisco|mes|3100|jun|hua
-	GetVlans() ([]dproto.Vlan, error)						// dlink|cisco|mes|3100|jun|hua
-	GetIps() ([]dproto.Ipif, error)					// dlink|cisco|mes|3100|jun|hua
+	GetInterfaces() (map[string]*dproto.Interface, error)	// dlink|cisco|mes|3100|jun|hua
+	GetLldp() ([]*dproto.LldpNeighbor, error)				// dlink|cisco|mes|3100|jun|hua
+	GetVlans() ([]*dproto.Vlan, error)						// dlink|cisco|mes|3100|jun|hua
+	GetIps() ([]*dproto.Ipif, error)					// dlink|cisco|mes|3100|jun|hua
 	GetUplink() (string, error)						// dlink|cisco|mes|3100|jun|hua-
 	GetConfig() (string, error)						// dlink|cisco|mes|3100|jun|hua
 
 	SetLogger(func(string, ...interface{}))
 	SetDebugLogger(func(string, ...interface{}))
 
-
 	Disconnect()
 }
+
+var ErrNotImplemented = fmt.Errorf("Method not implemented")
 
 // Generic profile realization. Used for dummy functions, like 'not implemented, sorry'
 // Cli in connected state should be passed in Init

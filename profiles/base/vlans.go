@@ -16,8 +16,9 @@ import (
 }
 */
 // GetVlans dummy
-func (p *Generic) GetVlans() ([]dproto.Vlan, error) {
-	return make([]dproto.Vlan, 0), fmt.Errorf("Sorry, GetVlans not implemented in current profile")
+func (p *Generic) GetVlans() ([]*dproto.Vlan, error) {
+	//return make([]dproto.Vlan, 0), ErrNotImplemented
+	return make([]*dproto.Vlan, 0), fmt.Errorf("Sorry, GetVlans not implemented in current profile")
 }
 
 // ExpandVlanRange

@@ -10,9 +10,9 @@ import (
 )
 
 // GetLldp for DLinkDxS profile
-func (p *Profile) GetLldp() ([]dproto.LldpNeighbor, error) {
+func (p *Profile) GetLldp() ([]*dproto.LldpNeighbor, error) {
 	p.Debug("starting DLinkDxS.GetLldp()")
-	neighbors := make([]dproto.LldpNeighbor, 0)
+	neighbors := make([]*dproto.LldpNeighbor, 0)
 
 	out, err := p.Cli.Cmd("show lldp remote_ports mode normal")
 	if err != nil {
@@ -64,7 +64,7 @@ func (p *Profile) GetLldp() ([]dproto.LldpNeighbor, error) {
 				ChassisID:cid,
 				PortID:pid,
 			}
-			neighbors = append(neighbors, item)
+			neighbors = append(neighbors, &item)
 		}
 	}
 

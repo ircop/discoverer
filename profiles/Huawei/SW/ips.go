@@ -9,8 +9,8 @@ import (
 )
 
 // GetIps for HuaweiSW
-func (p *Profile) GetIps() ([]dproto.Ipif, error) {
-	addresses := make([]dproto.Ipif, 0)
+func (p *Profile) GetIps() ([]*dproto.Ipif, error) {
+	addresses := make([]*dproto.Ipif, 0)
 	p.Log("Starting HuaweiSW.GetIps()")
 
 	patterns := make(map[string]string)
@@ -59,7 +59,7 @@ func (p *Profile) GetIps() ([]dproto.Ipif, error) {
 				IP:ip.String(),
 				Mask:mask.String(),
 			}
-			addresses = append(addresses, iface)
+			addresses = append(addresses, &iface)
 		}
 	}
 

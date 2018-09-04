@@ -8,9 +8,9 @@ import (
 )
 
 // GetInterfaces for HuaweiSW profile
-func (p *Profile) GetInterfaces() (map[string]dproto.Interface, error) {
+func (p *Profile) GetInterfaces() (map[string]*dproto.Interface, error) {
 	p.Debug("Starting HuaweiSW.GetInterfaces()")
-	interfaces := make(map[string]dproto.Interface)
+	interfaces := make(map[string]*dproto.Interface)
 
 	patterns := make(map[string]string, 0)
 	patterns["ifname"] = `(?m)^(?P<ifname>[^\s]+) current state`
@@ -70,7 +70,7 @@ func (p *Profile) GetInterfaces() (map[string]dproto.Interface, error) {
 			iface.PoMembers = members
 		}
 
-		interfaces[ifname] = iface
+		interfaces[ifname] = &iface
 	}
 
 	return interfaces, nil

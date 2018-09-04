@@ -9,9 +9,9 @@ import (
 )
 
 // GetVlans for DLinkDGS3100
-func (p *Profile) GetVlans() ([]dproto.Vlan, error) {
+func (p *Profile) GetVlans() ([]*dproto.Vlan, error) {
 	p.Log("Starting DLinkDGS3100.GetVlans()")
-	vlans := make([]dproto.Vlan, 0)
+	vlans := make([]*dproto.Vlan, 0)
 
 	result, err := p.Cli.Cmd("show vlan")
 	if err != nil {
@@ -60,7 +60,7 @@ func (p *Profile) GetVlans() ([]dproto.Vlan, error) {
 			AccessPorts:untag,
 			TrunkPorts:tag,
 		}
-		vlans = append(vlans, vlan)
+		vlans = append(vlans, &vlan)
 	}
 
 	return vlans, nil

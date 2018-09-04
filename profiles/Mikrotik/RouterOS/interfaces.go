@@ -6,9 +6,9 @@ import (
 )
 
 // GetInterfaces for RouterOS profile
-func (p *Profile) GetInterfaces() (map[string]dproto.Interface, error) {
+func (p *Profile) GetInterfaces() (map[string]*dproto.Interface, error) {
 	p.Debug("Starting RouterOS.GetInterfaces()")
-	interfaces := make(map[string]dproto.Interface)
+	interfaces := make(map[string]*dproto.Interface)
 
 	patterns := make(map[string]string)
 	patterns["ports"] = `(?m:\s+\d+\s+[DXRS]+\s+(?P<comment>;;;[^\n]+\n\s+)?name="(?P<name>[^"]+)")\s+(default-name="[^"]+"\s+)?type="(?P<type>[^"]+)"`
@@ -44,7 +44,7 @@ func (p *Profile) GetInterfaces() (map[string]dproto.Interface, error) {
 			Shortname:intName,
 			Type:tp,
 		}
-		interfaces[intName] = iface
+		interfaces[intName] = &iface
 	}
 
 	return interfaces, nil

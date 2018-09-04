@@ -9,8 +9,8 @@ import (
 )
 
 // GetIps for DLinkDGS3100
-func (p *Profile) GetIps() ([]dproto.Ipif, error) {
-	addresses := make([]dproto.Ipif, 0)
+func (p *Profile) GetIps() ([]*dproto.Ipif, error) {
+	addresses := make([]*dproto.Ipif, 0)
 	p.Log("Starting DLinkDGS3100.GetIps()")
 
 	result, err := p.Cli.Cmd("show ipif")
@@ -41,7 +41,7 @@ func (p *Profile) GetIps() ([]dproto.Ipif, error) {
 		IP:ip.String(),
 		Mask:mask.String(),
 	}
-	addresses = append(addresses, addr)
+	addresses = append(addresses, &addr)
 
 	return addresses, nil
 }

@@ -9,9 +9,9 @@ import (
 )
 
 // GetLldp for JunOS profile
-func (p *Profile) GetLldp() ([]dproto.LldpNeighbor, error) {
+func (p *Profile) GetLldp() ([]*dproto.LldpNeighbor, error) {
 	p.Debug("starting JunOS.GetLldp()")
-	neighbors := make([]dproto.LldpNeighbor, 0)
+	neighbors := make([]*dproto.LldpNeighbor, 0)
 
 	result, err := p.Cli.Cmd("show lldp neighbors")
 	if err != nil {
@@ -53,7 +53,7 @@ func (p *Profile) GetLldp() ([]dproto.LldpNeighbor, error) {
 			ChassisID:cid,
 			PortID:pid,
 		}
-		neighbors = append(neighbors, nei)
+		neighbors = append(neighbors, &nei)
 	}
 
 	return neighbors, nil

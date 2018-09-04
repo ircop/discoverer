@@ -18,6 +18,7 @@ import (
 }*/
 
 // GetLldp dummy
-func (p *Generic) GetLldp() ([]dproto.LldpNeighbor, error) {
-	return make([]dproto.LldpNeighbor, 0), fmt.Errorf("Sorry, GetLldp not implemented in current profile")
+func (p *Generic) GetLldp() ([]*dproto.LldpNeighbor, error) {
+	//return make([]dproto.LldpNeighbor, 0), ErrNotImplemented
+	return make([]*dproto.LldpNeighbor, 0), fmt.Errorf("Sorry, GetLldp not implemented in current profile")
 }

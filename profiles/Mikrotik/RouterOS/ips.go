@@ -8,8 +8,8 @@ import (
 )
 
 // GetIps for RouterOS
-func (p *Profile) GetIps() ([]dproto.Ipif, error) {
-	ipifs := make([]dproto.Ipif, 0)
+func (p *Profile) GetIps() ([]*dproto.Ipif, error) {
+	ipifs := make([]*dproto.Ipif, 0)
 	p.Log("Starting RouterOS.GetIps()")
 
 	patterns := make(map[string]string, 0)
@@ -52,7 +52,7 @@ func (p *Profile) GetIps() ([]dproto.Ipif, error) {
 			IP:ip.String(),
 			Mask:mask.String(),
 		}
-		ipifs = append(ipifs, ipif)
+		ipifs = append(ipifs, &ipif)
 	}
 
 	return ipifs, nil

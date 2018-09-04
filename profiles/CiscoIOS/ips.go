@@ -8,8 +8,8 @@ import (
 )
 
 // GetIps for CiscoIOS
-func (p *Profile) GetIps() ([]dproto.Ipif, error) {
-	addresses := make([]dproto.Ipif, 0)
+func (p *Profile) GetIps() ([]*dproto.Ipif, error) {
+	addresses := make([]*dproto.Ipif, 0)
 	p.Log("Starting CiscoIOS.GetIps()")
 
 	result, err := p.Cli.Cmd("show ip int")
@@ -59,7 +59,7 @@ func (p *Profile) GetIps() ([]dproto.Ipif, error) {
 				Mask:mask.String(),
 			}
 
-			addresses = append(addresses, intf)
+			addresses = append(addresses, &intf)
 		}
 	}
 

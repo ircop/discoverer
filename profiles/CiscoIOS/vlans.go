@@ -9,9 +9,9 @@ import (
 )
 
 // GetVlans for CiscoIOS
-func (p *Profile) GetVlans() ([]dproto.Vlan, error) {
+func (p *Profile) GetVlans() ([]*dproto.Vlan, error) {
 	p.Log("Starting CiscoIOS.GetVlans()")
-	vlans := make([]dproto.Vlan, 0)
+	vlans := make([]*dproto.Vlan, 0)
 	vlanmap := make(map[string]dproto.Vlan)
 
 	// here we need filled model/version
@@ -159,16 +159,16 @@ func (p *Profile) GetVlans() ([]dproto.Vlan, error) {
 
 	// vlanmap to vlan arr
 	for _, v := range vlanmap {
-		vlans = append(vlans, v)
+		vlans = append(vlans, &v)
 	}
 
 	return vlans, nil
 }
 
 // Find vlans on ASR*
-func (p *Profile) getRouterVlans() ([]dproto.Vlan, error) {
+func (p *Profile) getRouterVlans() ([]*dproto.Vlan, error) {
 	p.Log("Starting CiscoIOS.getRouterVlans()")
-	vlans := make([]dproto.Vlan, 0)
+	vlans := make([]*dproto.Vlan, 0)
 	vlanmap := make(map[string]dproto.Vlan)
 
 	patterns := make(map[string]string)
@@ -231,7 +231,7 @@ func (p *Profile) getRouterVlans() ([]dproto.Vlan, error) {
 	}
 
 	for _, v := range vlanmap {
-		vlans = append(vlans, v)
+		vlans = append(vlans, &v)
 	}
 
 	return vlans, nil

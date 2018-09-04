@@ -8,9 +8,9 @@ import (
 )
 
 // GetVlans for JunOS
-func (p *Profile) GetVlans() ([]dproto.Vlan, error) {
+func (p *Profile) GetVlans() ([]*dproto.Vlan, error) {
 	p.Log("Starting JunOS.GetVlans()")
-	vlans := make([]dproto.Vlan, 0)
+	vlans := make([]*dproto.Vlan, 0)
 
 	patterns := make(map[string]string)
 	patterns["split"] = `(?ms:^VLAN:)`
@@ -75,10 +75,10 @@ func (p *Profile) GetVlans() ([]dproto.Vlan, error) {
 			}
 		}
 
-		vlans = append(vlans, vlan)
+		vlans = append(vlans, &vlan)
 	}
 
-	p.Debug("COUNT: %d\n", len(vlans))
+	//p.Debug("COUNT: %d\n", len(vlans))
 
 	return vlans, nil
 }

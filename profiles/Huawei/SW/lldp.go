@@ -8,9 +8,9 @@ import (
 )
 
 // GetLldp for HuaweiSW profile
-func (p *Profile) GetLldp() ([]dproto.LldpNeighbor, error) {
+func (p *Profile) GetLldp() ([]*dproto.LldpNeighbor, error) {
 	p.Debug("starting HuaweiSW.GetLldp()")
-	neighbors := make([]dproto.LldpNeighbor, 0)
+	neighbors := make([]*dproto.LldpNeighbor, 0)
 
 	patterns := make(map[string]string)
 	patterns["ifname"] = `(?ms)^(?P<ifname>[^\s]+) has \d+ nei.+`
@@ -52,7 +52,7 @@ func (p *Profile) GetLldp() ([]dproto.LldpNeighbor, error) {
 				ChassisID:cid,
 				PortID:pid,
 			}
-			neighbors = append(neighbors, neighbor)
+			neighbors = append(neighbors, &neighbor)
 		}
 	}
 

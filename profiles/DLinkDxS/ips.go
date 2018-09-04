@@ -9,8 +9,8 @@ import (
 )
 
 // GetIps for DLinkDxS
-func (p *Profile) GetIps() ([]dproto.Ipif, error) {
-	ipifs := make([]dproto.Ipif, 0)
+func (p *Profile) GetIps() ([]*dproto.Ipif, error) {
+	ipifs := make([]*dproto.Ipif, 0)
 	p.Log("Starting DLinkDxS.GetIps()")
 
 	result, err := p.Cli.Cmd("show ipif")
@@ -56,7 +56,7 @@ func (p *Profile) GetIps() ([]dproto.Ipif, error) {
 				IP:        ip.String(),
 				Mask:      mask.String(),
 			}
-			ipifs = append(ipifs, Interface)
+			ipifs = append(ipifs, &Interface)
 		}
 	}
 
@@ -89,7 +89,7 @@ func (p *Profile) GetIps() ([]dproto.Ipif, error) {
 				Mask:mask.String(),
 			}
 
-			ipifs = append(ipifs, intf)
+			ipifs = append(ipifs, &intf)
 		}
 	}
 

@@ -10,8 +10,8 @@ import (
 )
 
 // GetIps for EltexMES
-func (p *Profile) GetIps() ([]dproto.Ipif, error) {
-	ipifs := make([]dproto.Ipif, 0)
+func (p *Profile) GetIps() ([]*dproto.Ipif, error) {
+	ipifs := make([]*dproto.Ipif, 0)
 	p.Log("Starting EltexMES.GetIps()")
 
 	result, err := p.Cli.Cmd("sh ip interface")
@@ -68,7 +68,7 @@ func (p *Profile) GetIps() ([]dproto.Ipif, error) {
 			IP:ip.String(),
 			Mask:mask.String(),
 		}
-		ipifs = append(ipifs, intf)
+		ipifs = append(ipifs, &intf)
 	}
 
 	return ipifs, nil

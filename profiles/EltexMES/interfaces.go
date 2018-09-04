@@ -9,9 +9,9 @@ import (
 )
 
 // GetInterfaces for EltexMES profile
-func (p *Profile) GetInterfaces() (map[string]dproto.Interface, error) {
+func (p *Profile) GetInterfaces() (map[string]*dproto.Interface, error) {
 	p.Debug("Starting EltexMES.GetInterfaces()")
-	interfaces := make(map[string]dproto.Interface)
+	interfaces := make(map[string]*dproto.Interface)
 
 	patterns := make(map[string]string)
 	patterns["ifs"] = `(?ms:^(?P<ifname>[a-zA-Z]\S+)\s+(?P<oper>Up|Down)\s+(?P<admin>Up|Down|Not Present)\s(?:(?P<desc>.*?)?)?)`
@@ -44,7 +44,7 @@ func (p *Profile) GetInterfaces() (map[string]dproto.Interface, error) {
 				Shortname:ifname,
 				LldpID:ifname,
 			}
-			interfaces[ifname] = iface
+			interfaces[ifname] = &iface
 		}
 	}
 
@@ -78,7 +78,7 @@ func (p *Profile) GetInterfaces() (map[string]dproto.Interface, error) {
 			Type:dproto.InterfaceType_AGGREGATED,
 			PoMembers:iflist,
 		}
-		interfaces[ifname] = iface
+		interfaces[ifname] = &iface
 	}
 
 	// And L3 interfaces (svi's)
@@ -120,7 +120,7 @@ func (p *Profile) GetInterfaces() (map[string]dproto.Interface, error) {
 			Shortname: ifname,
 			Type:dproto.InterfaceType_AGGREGATED,
 		}
-		interfaces[ifname] = iface
+		interfaces[ifname] = &iface
 	}
 
 	return interfaces, nil

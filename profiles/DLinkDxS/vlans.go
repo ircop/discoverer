@@ -9,9 +9,9 @@ import (
 )
 
 // GetVlans for DLinkDxS
-func (p *Profile) GetVlans() ([]dproto.Vlan, error) {
+func (p *Profile) GetVlans() ([]*dproto.Vlan, error) {
 	p.Log("Starting DLinkDxS.GetVlans()")
-	vlans := make([]dproto.Vlan, 0)
+	vlans := make([]*dproto.Vlan, 0)
 
 	result, err := p.Cli.Cmd("show vlan")
 	if err != nil {
@@ -58,7 +58,7 @@ func (p *Profile) GetVlans() ([]dproto.Vlan, error) {
 				TrunkPorts:  p.ExpandInterfaceRange(taggedStr),
 			}
 
-			vlans = append(vlans, vlan)
+			vlans = append(vlans, &vlan)
 			continue
 		}
 
@@ -102,7 +102,7 @@ func (p *Profile) GetVlans() ([]dproto.Vlan, error) {
 				AccessPorts: untag,
 				TrunkPorts: tag,
 			}
-			vlans = append(vlans, vlan)
+			vlans = append(vlans, &vlan)
 			continue
 		}
 	}

@@ -8,10 +8,10 @@ import (
 )
 
 // GetInterfaces for DLinkDxS profile
-func (p *Profile) GetInterfaces() (map[string]dproto.Interface, error) {
+func (p *Profile) GetInterfaces() (map[string]*dproto.Interface, error) {
 	p.Debug("Starting DLinkDxS.GetInterfaces()")
 
-	interfaces := make(map[string]dproto.Interface)
+	interfaces := make(map[string]*dproto.Interface)
 
 	result, err := p.Cli.Cmd("show ports description")
 	if err != nil {
@@ -51,7 +51,7 @@ func (p *Profile) GetInterfaces() (map[string]dproto.Interface, error) {
 			newInt.LldpID = id
 		}
 
-		interfaces[name] = newInt
+		interfaces[name] = &newInt
 	}
 
 	portchannels := p.getPortchannels()
@@ -70,7 +70,7 @@ func (p *Profile) GetInterfaces() (map[string]dproto.Interface, error) {
 			Type: dproto.InterfaceType_AGGREGATED,
 			PoMembers: portMembers,
 		}
-		interfaces[name] = newInt
+		interfaces[name] = &newInt
 	}
 
 	return interfaces, nil

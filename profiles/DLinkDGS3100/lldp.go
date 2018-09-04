@@ -8,9 +8,9 @@ import (
 )
 
 // GetLldp for DLinkDGS3100 profile
-func (p *Profile) GetLldp() ([]dproto.LldpNeighbor, error) {
+func (p *Profile) GetLldp() ([]*dproto.LldpNeighbor, error) {
 	p.Debug("starting DLinkDGS3100.GetLldp()")
-	neighbors := make([]dproto.LldpNeighbor, 0)
+	neighbors := make([]*dproto.LldpNeighbor, 0)
 
 	result, err := p.Cli.Cmd("show lldp remote_ports")
 	if err != nil {
@@ -33,7 +33,7 @@ func (p *Profile) GetLldp() ([]dproto.LldpNeighbor, error) {
 			ChassisID:cid,
 			PortID:pid,
 		}
-		neighbors = append(neighbors, nei)
+		neighbors = append(neighbors, &nei)
 	}
 
 	return neighbors, nil

@@ -10,8 +10,8 @@ import (
 )
 
 // GetIps for JunOS
-func (p *Profile) GetIps() ([]dproto.Ipif, error) {
-	ipifs := make([]dproto.Ipif, 0)
+func (p *Profile) GetIps() ([]*dproto.Ipif, error) {
+	ipifs := make([]*dproto.Ipif, 0)
 	p.Log("Starting JunOS.GetIps()")
 
 	result, err := p.Cli.Cmd("show interfaces terse")
@@ -81,7 +81,7 @@ func (p *Profile) GetIps() ([]dproto.Ipif, error) {
 				IP:ip.String(),
 				Mask:mask.String(),
 			}
-			ipifs = append(ipifs, ipif)
+			ipifs = append(ipifs, &ipif)
 		}
 	}
 

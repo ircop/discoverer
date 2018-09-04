@@ -9,9 +9,9 @@ import (
 )
 
 // GetVlans for HuaweiSW
-func (p *Profile) GetVlans() ([]dproto.Vlan, error) {
+func (p *Profile) GetVlans() ([]*dproto.Vlan, error) {
 	p.Log("Starting HuaweiSW.GetVlans()")
-	vlans := make([]dproto.Vlan, 0)
+	vlans := make([]*dproto.Vlan, 0)
 
 	patterns := make(map[string]string)
 	patterns["cut"] = `(?mis:^(?P<content>VID\s+Type.+)VID\s+Status)`
@@ -90,7 +90,7 @@ func (p *Profile) GetVlans() ([]dproto.Vlan, error) {
 			}
 			vlan.TrunkPorts = append(vlan.TrunkPorts, ifname)
 		}
-		vlans = append(vlans, vlan)
+		vlans = append(vlans, &vlan)
 	}
 
 	return vlans, nil

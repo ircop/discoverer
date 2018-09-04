@@ -9,9 +9,9 @@ import (
 )
 
 // GetInterfaces for CiscoIOS profile
-func (p *Profile) GetInterfaces() (map[string]dproto.Interface, error) {
+func (p *Profile) GetInterfaces() (map[string]*dproto.Interface, error) {
 	p.Debug("Starting CiscoIOS.GetInterfaces()")
-	interfaces := make(map[string]dproto.Interface)
+	interfaces := make(map[string]*dproto.Interface)
 
 	patterns := make(map[string]string)
 	patterns["ports"] = `(?m:^(\s+)?(?P<ifname>.+?)\s+is(?:\s+administratively)?\s+`+
@@ -70,7 +70,7 @@ func (p *Profile) GetInterfaces() (map[string]dproto.Interface, error) {
 			}
 		}
 
-		interfaces[ifname] = newInt
+		interfaces[ifname] = &newInt
 	}
 
 	return interfaces, nil

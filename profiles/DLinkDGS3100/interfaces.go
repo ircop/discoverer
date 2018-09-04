@@ -10,9 +10,9 @@ import (
 )
 
 	// GetInterfaces for DLinkDGS3100 profile
-	func (p *Profile) GetInterfaces() (map[string]dproto.Interface, error) {
+	func (p *Profile) GetInterfaces() (map[string]*dproto.Interface, error) {
 		p.Debug("Starting DLinkDxS.GetInterfaces()")
-	interfaces := make(map[string]dproto.Interface)
+	interfaces := make(map[string]*dproto.Interface)
 
 	result, err := p.Cli.Cmd("sh ports description")
 	if err != nil {
@@ -38,7 +38,7 @@ import (
 			Description:desc,
 			Type: dproto.InterfaceType_PHISYCAL,
 		}
-		interfaces[ifname] = newInt
+		interfaces[ifname] = &newInt
 	}
 
 	// todo: portchannels
@@ -69,7 +69,7 @@ import (
 			PoMembers: ifaces,
 			Type:dproto.InterfaceType_AGGREGATED,
 		}
-		interfaces["ch"+gid] = newInt
+		interfaces["ch"+gid] = &newInt
 	}
 
 	return interfaces, nil

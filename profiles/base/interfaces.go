@@ -53,8 +53,9 @@ type Interface struct {
 }*/
 
 // GetInterfaces gathers interfaces data on the device
-func (p *Generic) GetInterfaces() (map[string]dproto.Interface, error) {
-	return make(map[string]dproto.Interface), fmt.Errorf("Sorry, GetInterfaces() not implemented for this profile")
+func (p *Generic) GetInterfaces() (map[string]*dproto.Interface, error) {
+	//return make(map[string]dproto.Interface), ErrNotImplemented
+	return make(map[string]*dproto.Interface), fmt.Errorf("Sorry, GetInterfaces() not implemented for this profile")
 }
 
 // GetInterfaceType determines interface type by interface short name

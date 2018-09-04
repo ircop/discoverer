@@ -11,9 +11,9 @@ import (
 )
 
 // GetInterfaces for JunOS profile
-func (p *Profile) GetInterfaces() (map[string]dproto.Interface, error) {
+func (p *Profile) GetInterfaces() (map[string]*dproto.Interface, error) {
 	p.Debug("Starting JunOS.GetInterfaces()")
-	interfaces := make(map[string]dproto.Interface)
+	interfaces := make(map[string]*dproto.Interface)
 
 	// run TERSE: get all active interfaces ; cut %.0 ; remember them
 	// run DESCRIPTIONS: get descriptions for collected interfaces
@@ -90,7 +90,7 @@ func (p *Profile) GetInterfaces() (map[string]dproto.Interface, error) {
 			iface.PoMembers = members
 		}
 
-		interfaces[ifname] = iface
+		interfaces[ifname] = &iface
 	}
 
 	// -- descriptions --
