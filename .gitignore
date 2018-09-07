@@ -1,3 +1,6 @@
 TODO.txt
 *.txt
 testing-web
+discoverer.toml
+examples/nats/
+

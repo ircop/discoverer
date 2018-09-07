@@ -28,8 +28,9 @@ enum ProfileType {
 }
 
 enum Protocol {
-    TELNET = 0;
-    SSH = 1;
+    NONE = 0;
+    TELNET = 1;
+    SSH = 2;
 }
 
 enum InterfaceType {

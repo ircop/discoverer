@@ -1,44 +1,48 @@
 package streamer
 
 import (
-	"github.com/ircop/discoverer/logger"
-	"github.com/nats-io/go-nats"
-	"github.com/pkg/errors"
-	"time"
 	"fmt"
+	"github.com/ircop/discoverer/logger"
+	nats "github.com/nats-io/go-nats-streaming"
+	"github.com/pkg/errors"
+	"os"
+	"strings"
 )
 
-var conn *nats.Conn
+var conn nats.Conn
 
 // Run streaming nats worker
 func Run(natsURL string, chanTasks string, chanReplies string) error {
 	logger.Log("Starting NATS worker")
 
 	var err error
-	conn, err = nats.Connect(natsURL, nats.ReconnectWait(time.Second * 2),
-			nats.DisconnectHandler(func(nc *nats.Conn) {
-				logger.Err("NATS server disconnected")
-			}),
-			nats.ReconnectHandler(func(nc *nats.Conn) {
-				logger.Log("NATS server got reconnected")
-			}),
-			nats.ClosedHandler(func(nc *nats.Conn) {
-				logger.Err("NATS server connection closed: %s", nc.LastError())
-			}),
-		)
+
+	hostname, err := os.Hostname()
+	hostname = strings.Replace(hostname, ".", "-", -1)
+	if err != nil {
+		return fmt.Errorf("Cannot discover hostname: %s", err.Error())
+	}
+
+	// todo: set uniq discoverer ID
+	conn, err = nats.Connect("test-cluster", hostname, nats.NatsURL(natsURL))
 	if err != nil {
 		return err
 	}
 	//defer conn.Close()
 
 	// subscribe
-	_, err = conn.QueueSubscribe(chanTasks, chanTasks, func(msg *nats.Msg) {
-		fmt.Printf(" - GOT REQUEST -\n")
-		go workerCallback(msg, chanReplies)
-	})
+	_, err = conn.QueueSubscribe(chanTasks, "", func(msg *nats.Msg) {
+			fmt.Printf(" - GOT REQUEST -\n")
+			go workerCallback(msg, chanReplies)
+		},
+		nats.DurableName("tasks"),
+		nats.MaxInflight(10),
+		nats.SetManualAckMode(),
+	)
 	if err != nil {
 		return errors.Wrap(err, "Cannot subsctibe to NATS tasks channel")
 	}
+	logger.Debug("Subscribed to '%s' channel", chanTasks)
 
 	return nil
 }

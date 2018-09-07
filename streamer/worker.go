@@ -1,6 +1,7 @@
 package streamer
 
 import (
+	"fmt"
 	"github.com/golang/protobuf/proto"
 	"github.com/ircop/discoverer/dproto"
 	"github.com/ircop/discoverer/logger"
@@ -13,9 +14,12 @@ import (
 	"github.com/ircop/discoverer/profiles/Mikrotik/RouterOS"
 	"github.com/ircop/discoverer/profiles/base"
 	"github.com/ircop/remote-cli"
-	"github.com/nats-io/go-nats"
+	nats "github.com/nats-io/go-nats-streaming"
 	"runtime/debug"
+	"sync"
 )
+
+var sendlock sync.Mutex
 
 func workerCallback(msg *nats.Msg, chanReplies string) {
 	// recover on top of all our jobs
@@ -24,6 +28,7 @@ func workerCallback(msg *nats.Msg, chanReplies string) {
 			logger.Panic("Recovered in nats worker callback: %+v\ntrace:\n%s\n", r, debug.Stack())
 		}
 	}()
+	msg.Ack()
 
 	logger.Debug("NATS worker got message")
 
@@ -43,6 +48,9 @@ func workerCallback(msg *nats.Msg, chanReplies string) {
 	} else {
 		cli = remote_cli.New(remote_cli.CliTypeTelnet, task.Host, int(task.Port), task.Login, task.Password, ``, int(task.Timeout))
 	}
+
+	//sendError(conn, chanReplies, RequestID, fmt.Sprintf("Failed to map device profile: %+#v", task.Profile.String()))
+	//return
 
 	var sw discoverer.Profile
 	switch task.Profile {
@@ -68,8 +76,8 @@ func workerCallback(msg *nats.Msg, chanReplies string) {
 		sw = &RouterOS.Profile{}
 		break
 	default:
-		logger.Err("Failed to map device profile: '%v'", task.Profile)
-		sendError(chanReplies, RequestID, "Failed to map device profile")
+		logger.Err("Failed to map device profile: '%v'", task.Profile.String())
+		sendError(conn, chanReplies, RequestID, fmt.Sprintf("Failed to map device profile: %+#v", task.Profile.String()))
 		return
 	}
 
@@ -77,16 +85,18 @@ func workerCallback(msg *nats.Msg, chanReplies string) {
 	sw.SetDebugLogger(logger.Debug)
 
 	if err = sw.Init(cli, "", ""); err != nil {
-		sendError(chanReplies, RequestID, err.Error())
+		sendError(conn, chanReplies, RequestID, err.Error())
 		logger.Err("Failed to init profile: %s", err.Error())
 		return
 	}
 	defer sw.Disconnect()
 
+
 	// Profile is ready, now run tasks
 	response := dproto.Response{
 		Type:task.Type,
 		Errors:make(map[string]string,0),
+		ReplyID:RequestID,
 	}
 
 
@@ -128,33 +138,35 @@ func workerCallback(msg *nats.Msg, chanReplies string) {
 		response.Vlans = vlans
 	}
 
-	sendReply(response, chanReplies, RequestID)
+	sendReply(conn, response, chanReplies)
+	logger.Debug("Should send reply: %+#v\n", response)
 }
 
-func sendReply(response dproto.Response, topic string, reply string) {
+func sendReply(conn nats.Conn, response dproto.Response, topic string) {
 	logger.Debug("- sending reply... -")
 	bs, err := proto.Marshal(&response)
 	if err != nil {
-		logger.Err("Cannot marshal response for request %s: %s", reply, err.Error())
+		logger.Err("Cannot marshal response for request: %s", err.Error())
 		return
 	}
 
-	msg := nats.Msg{
-		Data:bs,
-		Subject:topic,
-		Reply:reply,
-	}
-
-	err = conn.PublishMsg(&msg)
+	_, err = conn.PublishAsync(topic, bs, func(lguid string, errX error) {
+		if errX == nil {
+			logger.Debug("Got ack for reply %s", response.ReplyID)
+		} else {
+			logger.Err("Error sending reply id %s: %s", response.ReplyID, err.Error())
+		}
+	})
 	if err != nil {
-		logger.Err("Cannot send response for request %s: %s", reply, err.Error())
+		logger.Err("Cannot send response for request %s: %s", response.ReplyID, err.Error())
 	}
 }
 
-func sendError(topic string, reply string, message string) {
+func sendError(conn nats.Conn, topic string, reply string, message string) {
 	msg := dproto.Response{
 		Type:dproto.PacketType_ERROR,
 		Error:message,
+		ReplyID:reply,
 	}
 	bs, err := proto.Marshal(&msg)
 	if err != nil {
@@ -162,12 +174,13 @@ func sendError(topic string, reply string, message string) {
 		return
 	}
 
-	natsMsg := nats.Msg{
-		Data:bs,
-		Subject:topic,
-		Reply:reply,
-	}
-	err = conn.PublishMsg(&natsMsg)
+	_, err = conn.PublishAsync(topic, bs, func(lguid string, errX error) {
+		if errX == nil {
+			logger.Debug("Got ack for reply %s", msg.ReplyID)
+		} else {
+			logger.Err("Error sending reply id %s: %s", msg.ReplyID, err.Error())
+		}
+	})
 	if err != nil {
 		logger.Err("Cannot publish nats error message (req.%s): %s", reply, err.Error())
 	}

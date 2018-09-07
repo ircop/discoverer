@@ -94,7 +94,7 @@ func (m *TaskRequest) GetProto() Protocol {
 	if m != nil {
 		return m.Proto
 	}
-	return Protocol_TELNET
+	return Protocol_NONE
 }
 
 func (m *TaskRequest) GetHost() string {

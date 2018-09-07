@@ -19,9 +19,11 @@ message Response {
     string Uplink                       = 7;
     string Config                       = 8;
 
+    string ReplyID                      = 9;
+
     // We need this for bulk responses like 'all'
     map<string, string> Errors          = 99;
     string Error                        = 100;
 
-    reserved 9 to 98;
+    reserved 10 to 98;
 }
