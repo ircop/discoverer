@@ -28,7 +28,7 @@ func workerCallback(msg *nats.Msg, chanReplies string) {
 			logger.Panic("Recovered in nats worker callback: %+v\ntrace:\n%s\n", r, debug.Stack())
 		}
 	}()
-	msg.Ack()
+	defer msg.Ack()
 
 	logger.Debug("NATS worker got message")
 
@@ -84,9 +84,10 @@ func workerCallback(msg *nats.Msg, chanReplies string) {
 	sw.SetLogger(logger.Log)
 	sw.SetDebugLogger(logger.Debug)
 
+	logger.Log("Starting %s for %s...", task.Type.String(), task.Host)
 	if err = sw.Init(cli, "", ""); err != nil {
 		sendError(conn, chanReplies, RequestID, err.Error())
-		logger.Err("Failed to init profile: %s", err.Error())
+		logger.Err("Failed to init profile: %s (%s)", err.Error(), task.Host)
 		return
 	}
 	defer sw.Disconnect()
@@ -138,6 +139,7 @@ func workerCallback(msg *nats.Msg, chanReplies string) {
 		response.Vlans = vlans
 	}
 
+	logger.Log("Done %s for %s", task.Type.String(), task.Host)
 	sendReply(conn, response, chanReplies)
 	logger.Debug("Should send reply: %+#v\n", response)
 }

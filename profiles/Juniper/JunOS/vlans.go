@@ -15,7 +15,8 @@ func (p *Profile) GetVlans() ([]*dproto.Vlan, error) {
 	patterns := make(map[string]string)
 	patterns["split"] = `(?ms:^VLAN:)`
 	patterns["vlan"] = `(?ms:^VLAN:\s+(?P<name>[^,]+),.+\n802.1Q Tag:\s(?P<tag>\d+)[^\n]+\n[^\n]+\n[^\n]+.\n(?P<ifstring>.*))`
-	patterns["ifs"] = `(?ms:^\s+(?P<ifname>[^,]+).\s+(?P<mode>[^,]+))`
+	patterns["ifs"] = `(?ms:^(\s+)?(?P<ifname>[^,]+).\s+(?P<mode>[^,]+),)`
+	patterns["expand_ifs"] = `(?ms:Number of interfaces[^\n]+\n(?P<ifs>.+))`
 	regexps, err := p.CompileRegexps(patterns)
 	if err != nil {
 		return vlans, err
@@ -27,8 +28,13 @@ func (p *Profile) GetVlans() ([]*dproto.Vlan, error) {
 	}
 	p.Debug(result)
 
+	result = strings.Replace(result, "show vlans extensive", "", -1)
+
 	parts := regexps["split"].Split(result, -1)
 	for _, part := range parts {
+		if len(part) < 10 {
+			continue
+		}
 		part = "VLAN:" + part
 		out := p.ParseSingle(regexps["vlan"], part)
 
@@ -50,9 +56,17 @@ func (p *Profile) GetVlans() ([]*dproto.Vlan, error) {
 			ID:vid,
 		}
 
-		ifstring := strings.Trim(out["ifstring"], "\n")
+		//ifstring := strings.Trim(out["ifstring"], "\n")
+		//fmt.Printf("%s\n", name)
+		//fmt.Printf(ifstring)
+		out = p.ParseSingle(regexps["expand_ifs"], part)
+		ifstring := strings.Trim(out["ifs"], " ")
+
+		//fmt.Printf(ifstring)
+		//return vlans, nil
 		out2 := p.ParseMultiple(regexps["ifs"], ifstring)
 		for _, part2 := range out2 {
+
 			ifname := strings.Trim(part2["ifname"], " ")
 			ifname = strings.Replace(ifname, "*", "", -1)
 			ifname = strings.Replace(ifname, ".0", "", -1)
@@ -71,6 +85,7 @@ func (p *Profile) GetVlans() ([]*dproto.Vlan, error) {
 				break;
 			default:
 				p.Log("WARNING! Unknown vlan mode '%s' (port '%s', vlan '%s')", mode, ifname, name)
+				p.Log(part)
 				break
 			}
 		}

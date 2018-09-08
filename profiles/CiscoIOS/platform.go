@@ -12,7 +12,7 @@ import (
 
 // GetPlatform for IOS
 func (p *Profile) GetPlatform() (dproto.Platform, error) {
-	p.Debug("Starting CiscoIOS.GetPlatform()")
+	p.Log("Starting CiscoIOS.GetPlatform()")
 	var platform dproto.Platform
 	platform.Macs = make([]string, 0)
 

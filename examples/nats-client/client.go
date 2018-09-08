@@ -34,27 +34,32 @@ func main() {
 			go handleResponse(msg)
 		},
 		nats.DurableName("replies"),
-		nats.MaxInflight(10),
+		nats.MaxInflight(200),			// this is how mutch THIS CLIENT can handle one-time events
 		nats.SetManualAckMode(),
+		nats.AckWait(time.Minute * 15),
 	)
 	if err != nil {
 		fmt.Printf("Cannot subscribe to responses channel: %s\n", err.Error())
 		return
 	}
 
-	sendTask(natsConn, dproto.PacketType_PLATFORM, "10.170.3.99", dproto.Protocol_TELNET, dproto.ProfileType_DXS)
-	sendTask(natsConn, dproto.PacketType_INTERFACES, "10.170.3.99", dproto.Protocol_TELNET, dproto.ProfileType_DXS)
-	sendTask(natsConn, dproto.PacketType_PLATFORM, "10.10.10.248", dproto.Protocol_TELNET, dproto.ProfileType_DXS)
-	sendTask(natsConn, dproto.PacketType_IPS, "10.10.10.248", dproto.Protocol_TELNET, dproto.ProfileType_DXS)
-	sendTask(natsConn, dproto.PacketType_INTERFACES, "10.10.10.150", dproto.Protocol_TELNET, dproto.ProfileType_DXS)
+	go sendTask(natsConn, dproto.PacketType_PLATFORM, "10.170.3.99", dproto.Protocol_TELNET, dproto.ProfileType_DXS)
+	go sendTask(natsConn, dproto.PacketType_INTERFACES, "10.170.3.99", dproto.Protocol_TELNET, dproto.ProfileType_DXS)
+	go sendTask(natsConn, dproto.PacketType_PLATFORM, "10.10.10.248", dproto.Protocol_TELNET, dproto.ProfileType_DXS)
+	go sendTask(natsConn, dproto.PacketType_IPS, "10.10.10.248", dproto.Protocol_TELNET, dproto.ProfileType_DXS)
+	go sendTask(natsConn, dproto.PacketType_INTERFACES, "10.10.10.150", dproto.Protocol_TELNET, dproto.ProfileType_DXS)
+	go sendTask(natsConn, dproto.PacketType_PLATFORM, "10.170.3.99", dproto.Protocol_TELNET, dproto.ProfileType_DXS)
+	go sendTask(natsConn, dproto.PacketType_INTERFACES, "10.170.3.99", dproto.Protocol_TELNET, dproto.ProfileType_DXS)
+	go sendTask(natsConn, dproto.PacketType_PLATFORM, "10.10.10.248", dproto.Protocol_TELNET, dproto.ProfileType_DXS)
+	go sendTask(natsConn, dproto.PacketType_IPS, "10.10.10.248", dproto.Protocol_TELNET, dproto.ProfileType_DXS)
+	go sendTask(natsConn, dproto.PacketType_INTERFACES, "10.10.10.150", dproto.Protocol_TELNET, dproto.ProfileType_DXS)
 
 
 	select{}
 }
 
 func handleResponse(msg *nats.Msg) {
-	msg.Ack()
-
+	defer msg.Ack()
 
 	var response dproto.Response
 	err := proto.Unmarshal(msg.Data, &response)
@@ -150,8 +155,8 @@ func sendTask(conn nats.Conn, taskType dproto.PacketType, host string, protocol 
 	message := dproto.TaskRequest{
 		RequestID:id.String(),
 		Timeout: 60,
-		Login:"script2",
-		Password:"wre4fel",
+		Login:"login",
+		Password:"pw",
 		Profile:profile,
 		Type:taskType,
 		Enable:"",
@@ -172,7 +177,7 @@ func sendTask(conn nats.Conn, taskType dproto.PacketType, host string, protocol 
 		RequestID:id.String(),
 		Type:taskType,
 	}
-	wt.Timer = time.AfterFunc(time.Second * 120, func(){
+	wt.Timer = time.AfterFunc(time.Minute * 15, func(){
 		fmt.Printf("Removing waiting task '%s' from pool due to timeout\n", id.String())
 		TasksPool.Delete(id.String())
 	})

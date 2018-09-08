@@ -10,7 +10,7 @@ import (
 
 // GetInterfaces for CiscoIOS profile
 func (p *Profile) GetInterfaces() (map[string]*dproto.Interface, error) {
-	p.Debug("Starting CiscoIOS.GetInterfaces()")
+	p.Log("Starting CiscoIOS.GetInterfaces()")
 	interfaces := make(map[string]*dproto.Interface)
 
 	patterns := make(map[string]string)

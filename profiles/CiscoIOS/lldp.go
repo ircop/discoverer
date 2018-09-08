@@ -8,7 +8,7 @@ import (
 
 // GetLldp for CiscoIOS profile
 func (p *Profile) GetLldp() ([]*dproto.LldpNeighbor, error) {
-	p.Debug("starting CiscoIOS.GetLldp()")
+	p.Log("starting CiscoIOS.GetLldp()")
 	neighbors := make([]*dproto.LldpNeighbor, 0)
 
 	out, err := p.Cli.Cmd("show lldp neighbors")

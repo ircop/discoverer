@@ -68,7 +68,7 @@ func (p *Profile) GetVlans() ([]*dproto.Vlan, error) {
 		}
 		vlanmap[vidStr] = vlan
 	}
-	fmt.Printf("VLANMAP LEN %d\n", len(vlanmap))
+	//fmt.Printf("VLANMAP LEN %d\n", len(vlanmap))
 
 	// Got vlan IDs. Now parse switchports.
 	result, err = p.Cli.Cmd("show int switchport")

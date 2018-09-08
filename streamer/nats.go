@@ -7,6 +7,7 @@ import (
 	"github.com/pkg/errors"
 	"os"
 	"strings"
+	"time"
 )
 
 var conn nats.Conn
@@ -32,12 +33,13 @@ func Run(natsURL string, chanTasks string, chanReplies string) error {
 
 	// subscribe
 	_, err = conn.QueueSubscribe(chanTasks, "", func(msg *nats.Msg) {
-			fmt.Printf(" - GOT REQUEST -\n")
+			//fmt.Printf(" - GOT REQUEST -\n")
 			go workerCallback(msg, chanReplies)
 		},
-		nats.DurableName("tasks"),
-		nats.MaxInflight(10),
+		//nats.DurableName("tasks"),
+		nats.MaxInflight(100),				// this is how mutch THIS WORKER can handle one-time events
 		nats.SetManualAckMode(),
+		nats.AckWait(time.Minute * 15),
 	)
 	if err != nil {
 		return errors.Wrap(err, "Cannot subsctibe to NATS tasks channel")

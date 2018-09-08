@@ -90,9 +90,9 @@ func (l *logger) format(prefix string, message string, args ...interface{}) stri
 func (l *logger) write(message string, w io.Writer) error {
 	_, err := w.Write([]byte(message))
 
-	if l.debug {
+	//if l.debug {
 		fmt.Printf(message)
-	}
+	//}
 
 	if err != nil {
 		fmt.Printf("Error! Cannot write log: %s" , err.Error())

@@ -8,7 +8,7 @@ import (
 
 // return map[poName][]slaveName
 func (p *Profile) GetPortchannels() (map[string][]string, error) {
-	p.Debug("Starting CiscoIOS.GetPortchannels()")
+	p.Log("Starting CiscoIOS.GetPortchannels()")
 
 	pos := make(map[string][]string)
 
@@ -55,30 +55,7 @@ func (p *Profile) GetPortchannels() (map[string][]string, error) {
 		}
 		pos[name] = ifnames
 	}
-	//fmt.Printf("POS: \n %+v\n", pos)
 
-	/*strs := p.ParseMultiple(regexps["po"], result)
-	for _, str := range strs {
-		poName := str["name"]
-		dproto := str["dproto"]
-		ifString := str["ifstring"]
-
-		if poName == "" || dproto == "" {
-			p.Log("Cannot find all required PO parameters (name/dproto/ifs: %s/%s/%s)", poName, dproto, ifString)
-			continue
-		}
-
-		ifsOut := p.ParseMultiple(regexps["ifname"], ifString)
-		ifnames := make([]string,0)
-		for _, ifNamesResult := range ifsOut {
-			if ifname, ok := ifNamesResult["if"]; ok {
-				ifnames = append(ifnames, ifname)
-			}
-		}
-
-		pos[poName] = ifnames
-	}
-	fmt.Printf("POS: \n %+v\n", pos)*/
-
+	//p.Log("Done CiscoIOS.GetPortchannels()")
 	return pos, nil
 }
