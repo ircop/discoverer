@@ -32,5 +32,7 @@ func (p *Profile) GetConfig() (string, error) {
 		return "", fmt.Errorf("Cannot parse config")
 	}
 
+	p.Cli.Cmd("q")
+
 	return config, nil
 }

@@ -12,7 +12,7 @@ import (
 
 // GetInterfaces for JunOS profile
 func (p *Profile) GetInterfaces() (map[string]*dproto.Interface, error) {
-	p.Debug("Starting JunOS.GetInterfaces()")
+	p.Log("Starting JunOS.GetInterfaces()")
 	interfaces := make(map[string]*dproto.Interface)
 
 	// run TERSE: get all active interfaces ; cut %.0 ; remember them
@@ -41,7 +41,7 @@ func (p *Profile) GetInterfaces() (map[string]*dproto.Interface, error) {
 			continue
 		}
 		ifname := strings.Trim(row[0], " ")
-		if ifname == "" {
+		if ifname == "" || ifname == "vlan" {
 			continue
 		}
 		if strings.HasSuffix(ifname, ".0") {
@@ -75,19 +75,19 @@ func (p *Profile) GetInterfaces() (map[string]*dproto.Interface, error) {
 			ifaces = strings.Replace(ifaces, ".0", "", -1)
 			ifaces = strings.Replace(ifaces, "\n", "", -1)
 			ifaces = strings.Trim(ifaces, " ")
-			if ifaces == "" {
-				continue
-			}
 
-			out2 := p.ParseMultiple(reIfstring, ifaces)
-			members := make([]string, 0)
-			for _, part := range out2 {
-				iface := strings.Trim(part["iface"], " ")
-				if iface != "" {
-					members = append(members, iface)
+			if ifaces != "" {
+				out2 := p.ParseMultiple(reIfstring, ifaces)
+				members := make([]string, 0)
+				for _, part := range out2 {
+					iface := strings.Trim(part["iface"], " ")
+					if iface != "" {
+						members = append(members, iface)
+					}
 				}
+
+				iface.PoMembers = members
 			}
-			iface.PoMembers = members
 		}
 
 		interfaces[ifname] = &iface

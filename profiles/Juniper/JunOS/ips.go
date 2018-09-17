@@ -37,7 +37,7 @@ func (p *Profile) GetIps() ([]*dproto.Ipif, error) {
 		}
 
 		ifname := strings.Trim(row[0], " ")
-		if ifname == "" {
+		if ifname == ""  || ifname == "vlan" {
 			continue
 		}
 		if strings.HasSuffix(ifname, ".0") {

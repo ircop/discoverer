@@ -13,24 +13,30 @@ func (p *Profile) GetInterfaces() (map[string]*dproto.Interface, error) {
 
 	interfaces := make(map[string]*dproto.Interface)
 
+	patterns := make(map[string]string)
+	patterns["ports"] = `(?m:^\s*(?P<port>\d+(/|:)?\d*)\s*(\((?P<media_type>(C|F))\))?\s+(?P<admin_state>Enabled|Disabled)\s+(?P<admin_speed>Auto|10M|100M|1000M|10G)/((?P<admin_duplex>Half|Full)/)?(?P<admin_flowctrl>Enabled|Disabled)\s+(?P<status>LinkDown|Link\sDown|(?:Err|Loop)\-Disabled|Empty)?((?P<speed>10M|100M|1000M|10G)/(?P<duplex>Half|Full)/(?P<flowctrl>None|Disabled|802.3x))?\s+(?P<addr_learning>Enabled|Disabled)\s*((?P<trap_state>Enabled|Disabled)\s*)?((?P<asd>\-)\s*)?(\n\s+(?P<mdix>Auto|MDI|MDIX|Cross|Normal|\-)\s*)?(\n\s*Desc(ription)?:\s*?(?P<desc>.*?))?$)`
+	patterns["portCRLF"] = `(\s+)Port\s+State`
+	regexps, err := p.CompileRegexps(patterns)
+	if err != nil {
+		return interfaces, err
+	}
+
 	result, err := p.Cli.Cmd("show ports description")
 	if err != nil {
 		p.Debug(result)
 		return interfaces, fmt.Errorf("Error getting interfaces: %s", err.Error())
 	}
+	//result = strings.Replace(result, )
+	// dirty magic :( Because of stupid dlink pagination:
+	result = regexps["portCRLF"].ReplaceAllString(result, "\n\nPort  State")
 	p.Debug(result)
 
-	rePortsStr := `(?m:^\s*(?P<port>\d+(/|:)?\d*)\s*(\((?P<media_type>(C|F))\))?\s+(?P<admin_state>Enabled|Disabled)\s+(?P<admin_speed>Auto|10M|100M|1000M|10G)/((?P<admin_duplex>Half|Full)/)?(?P<admin_flowctrl>Enabled|Disabled)\s+(?P<status>LinkDown|Link\sDown|(?:Err|Loop)\-Disabled|Empty)?((?P<speed>10M|100M|1000M|10G)/(?P<duplex>Half|Full)/(?P<flowctrl>None|Disabled|802.3x))?\s+(?P<addr_learning>Enabled|Disabled)\s*((?P<trap_state>Enabled|Disabled)\s*)?((?P<asd>\-)\s*)?(\n\s+(?P<mdix>Auto|MDI|MDIX|Cross|Normal|\-)\s*)?(\n\s*Desc(ription)?:\s*?(?P<desc>.*?))?$)`
-	rePorts, err := regexp.Compile(rePortsStr)
-	if err != nil {
-		return interfaces, err
-	}
 
 	// get lacp local info
 	portIds := p.lldpLocalPorts()
 
 	// get ports
-	ports := p.ParseMultiple(rePorts, result)
+	ports := p.ParseMultiple(regexps["ports"], result)
 	for _, port := range ports {
 		name := strings.Trim(port["port"], " ")
 
@@ -73,7 +79,47 @@ func (p *Profile) GetInterfaces() (map[string]*dproto.Interface, error) {
 		interfaces[name] = &newInt
 	}
 
+	ipifs, err := p.getIpifs()
+	if err != nil {
+		return interfaces, err
+	}
+	for name, _ := range ipifs {
+		newInt := dproto.Interface{
+			Name:name,
+			Shortname:name,
+			Type:dproto.InterfaceType_SVI,
+			LldpID:name,
+		}
+		interfaces[name] = &newInt
+	}
+
 	return interfaces, nil
+}
+
+func (p *Profile) getIpifs() (map[string]string, error) {
+	ipifs := make(map[string]string)
+
+	result, err := p.Cli.Cmd("show ipif")
+	if err != nil {
+		p.Debug(result)
+		return ipifs, fmt.Errorf("Error getting ipifs: %s", err.Error())
+	}
+	p.Debug(result)
+
+	reIpif, err := regexp.Compile(`(?msi:^VLAN name\s+:\s+(?P<ipif>[^\n]+)\n)`)
+	if err != nil {
+		return ipifs, fmt.Errorf("Failed to compile ipif regex: %s", err.Error())
+	}
+
+	out := p.ParseMultiple(reIpif, result)
+	for _, part := range out {
+		ipif := strings.Trim(part["ipif"], " ")
+		if ipif != "" {
+			ipifs[ipif] = ipif
+		}
+	}
+
+	return ipifs, nil
 }
 
 // Port-channel information

@@ -82,9 +82,6 @@ func (p *Profile) ConvertIfname(fullname string, re *regexp.Regexp) (string, err
 
 	out := re.FindStringSubmatch(strings.ToLower(fullname))
 	if len(out) < 3 {
-		//for _, b := range []byte(fullname) {
-		//	fmt.Printf("%s | %d\n", string(b), b)
-		//}
 		return short, fmt.Errorf("Failed to get interface short name: %s", fullname)
 	}
 

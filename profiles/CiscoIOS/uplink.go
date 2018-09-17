@@ -16,8 +16,9 @@ func (p *Profile) GetUplink() (string, error) {
 
 	patterns := make(map[string]string)
 	patterns["gw"] = `\* (?P<ip>\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b)`
-	patterns["arp"] = `Internet\s+(?P<ip>\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b)\s+(\d+|-)\s+[^\s]+\s+ARPA\s+(?P<ifname>[^\n]+)\n`
+	patterns["arp"] = `Internet\s+(?P<ip>\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b)\s+(\d+|-)\s+(?P<mac>[^\s]+)\s+ARPA\s+(?P<ifname>[^\n]+)\n`
 	patterns["ifname"] = `^(?P<type>[a-z]{2})[a-z\-]*\s*(?P<number>\d+(/\d+(/\d+)?)?(\.\d+(/\d+)*(\.\d+)?)?(:\d+(\.\d+)*)?(/[a-z]+\d+(\.\d+)?)?(A|B)?)$`
+	patterns["if"] = `(?mi:\s+(?P<vid>\d+)\s+[^\s]+\s+dynamic ip\s+(?P<ifname>[^\s]+)(\s+)?\n)`
 	regexps, err := p.CompileRegexps(patterns)
 	if err != nil {
 		return "", err
@@ -43,10 +44,21 @@ func (p *Profile) GetUplink() (string, error) {
 	p.Debug(strings.Replace(r, "%", "%%", -1))
 
 	out = p.ParseSingle(regexps["arp"], r)
-	ifname := strings.Trim(out["ifname"], " ")
-	if ifname == "" {
+	mac := strings.Trim(out["mac"], " ")
+	//ifname := strings.Trim(out["ifname"], " ")
+	if  mac == ""{
 		return "", fmt.Errorf("Cannot parse uplink ifname by arp record")
 	}
+
+	r, err = p.Cli.Cmd(fmt.Sprintf("sh mac address-table address %s", mac))
+	if err != nil {
+		return "", fmt.Errorf("Error requesting uplink mac: %s", err.Error())
+	}
+	p.Debug(r)
+
+	out = p.ParseSingle(regexps["if"], r)
+	ifname := strings.Trim(out["ifname"], " ")
+
 
 	short, err := p.ConvertIfname(ifname, regexps["ifname"])
 	if err != nil {

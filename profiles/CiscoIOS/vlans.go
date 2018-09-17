@@ -23,7 +23,6 @@ func (p *Profile) GetVlans() ([]*dproto.Vlan, error) {
 		// router does not have vlans
 		// update: todo: check dot1q encapsulation on interfaces
 		return p.getRouterVlans()
-		//return vlans, nil
 	}
 
 
@@ -76,9 +75,8 @@ func (p *Profile) GetVlans() ([]*dproto.Vlan, error) {
 		return vlans, fmt.Errorf("Cannot run 'show int switchport': %s", err.Error())
 	}
 	p.Debug(result)
-	//parts := regexps["split"].Split(result, -1)
+
 	parts := strings.Split(result, "Name:")
-	//fmt.Printf("PARTS: %d\n", len(parts))
 	for _, part := range parts {
 		part = "Name:" + part
 		out := p.ParseSingle(regexps["switchport"], part)
@@ -158,7 +156,8 @@ func (p *Profile) GetVlans() ([]*dproto.Vlan, error) {
 	}
 
 	// vlanmap to vlan arr
-	for _, v := range vlanmap {
+	for n, _ := range vlanmap {
+		v := vlanmap[n]
 		vlans = append(vlans, &v)
 	}
 
