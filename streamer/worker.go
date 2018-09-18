@@ -85,7 +85,7 @@ func workerCallback(msg *nats.Msg, chanReplies string) {
 	sw.SetDebugLogger(logger.Debug)
 
 	logger.Log("Starting %s for %s...", task.Type.String(), task.Host)
-	if err = sw.Init(cli, "", ""); err != nil {
+	if err = sw.Init(cli, task.Enable, ""); err != nil {
 		sendError(conn, chanReplies, RequestID, err.Error())
 		logger.Err("Failed to init profile: %s (%s)", err.Error(), task.Host)
 		return
@@ -105,37 +105,58 @@ func workerCallback(msg *nats.Msg, chanReplies string) {
 	// if this is 'all', we should return set of errors in some way...
 	if task.Type == dproto.PacketType_PLATFORM || task.Type == dproto.PacketType_ALL {
 		platform, err := sw.GetPlatform()
-		if err != nil { response.Errors[dproto.PacketType_PLATFORM.String()] = err.Error() }
+		if err != nil {
+			response.Errors[dproto.PacketType_PLATFORM.String()] = err.Error()
+			logger.Err("%s: %s: %s", task.Host, task.Type.String(), err.Error())
+		}
 		response.Platform = &platform
 	}
 	if task.Type == dproto.PacketType_CONFIG || task.Type == dproto.PacketType_ALL {
 		config, err := sw.GetConfig()
-		if err != nil { response.Errors[dproto.PacketType_CONFIG.String()] = err.Error() }
+		if err != nil {
+			response.Errors[dproto.PacketType_CONFIG.String()] = err.Error()
+			logger.Err("%s: %s: %s", task.Host, task.Type.String(), err.Error())
+		}
 		response.Config = config
 	}
 	if task.Type == dproto.PacketType_INTERFACES || task.Type == dproto.PacketType_ALL {
 		interfaces, err := sw.GetInterfaces()
-		if err != nil { response.Errors[dproto.PacketType_INTERFACES.String()] = err.Error() }
+		if err != nil {
+			response.Errors[dproto.PacketType_INTERFACES.String()] = err.Error()
+			logger.Err("%s: %s: %s", task.Host, task.Type.String(), err.Error())
+		}
 		response.Interfaces = interfaces
 	}
 	if task.Type == dproto.PacketType_IPS || task.Type == dproto.PacketType_ALL {
 		ipifs, err := sw.GetIps()
-		if err != nil { response.Errors[dproto.PacketType_IPS.String()] = err.Error() }
+		if err != nil {
+			response.Errors[dproto.PacketType_IPS.String()] = err.Error()
+			logger.Err("%s: %s: %s", task.Host, task.Type.String(), err.Error())
+		}
 		response.Ipifs = ipifs
 	}
 	if task.Type == dproto.PacketType_LLDP || task.Type == dproto.PacketType_ALL {
 		lldp, err := sw.GetLldp()
-		if err != nil { response.Errors[dproto.PacketType_LLDP.String()] = err.Error()}
+		if err != nil {
+			response.Errors[dproto.PacketType_LLDP.String()] = err.Error()
+			logger.Err("%s: %s: %s", task.Host, task.Type.String(), err.Error())
+		}
 		response.LldpNeighbors = lldp
 	}
 	if task.Type == dproto.PacketType_UPLINK || task.Type == dproto.PacketType_ALL {
 		up, err := sw.GetUplink()
-		if err != nil { response.Errors[dproto.PacketType_UPLINK.String()] = err.Error() }
+		if err != nil {
+			response.Errors[dproto.PacketType_UPLINK.String()] = err.Error()
+			logger.Err("%s: %s: %s", task.Host, task.Type.String(), err.Error())
+		}
 		response.Uplink = up
 	}
 	if task.Type == dproto.PacketType_VLANS || task.Type == dproto.PacketType_ALL {
 		vlans, err := sw.GetVlans()
-		if err != nil { response.Errors[dproto.PacketType_VLANS.String()] = err.Error()}
+		if err != nil {
+			response.Errors[dproto.PacketType_VLANS.String()] = err.Error()
+			logger.Err("%s: %s: %s", task.Host, task.Type.String(), err.Error())
+		}
 		response.Vlans = vlans
 	}
 

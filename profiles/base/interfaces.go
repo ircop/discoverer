@@ -74,7 +74,7 @@ func (p *Generic) GetInterfaceType(ifname string) dproto.InterfaceType {
 		return dproto.InterfaceType_LOOPBACK
 	} else if match, _ := regexp.Match(`^(fxp|mg|meth)`, []byte(strings.ToLower(ifname))); match {
 		return dproto.InterfaceType_MANAGEMENT
-	} else if match, _ := regexp.Match(`^(tun|ppp|l2t|pptp|ovpn|sstp|gre|ipip|eoip)`, []byte(strings.ToLower(ifname))); match {
+	} else if match, _ := regexp.Match(`^(tu|ppp|l2t|pptp|ovpn|sstp|gre|ipip|eoip)`, []byte(strings.ToLower(ifname))); match {
 		return dproto.InterfaceType_TUNNEL
 	}  else if match, _ := regexp.Match(`^(null)`, []byte(strings.ToLower(ifname))); match {
 		return dproto.InterfaceType_NULL

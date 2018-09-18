@@ -3,6 +3,7 @@ package CiscoIOS
 import (
 	"fmt"
 	"github.com/ircop/discoverer/dproto"
+	"github.com/ircop/discoverer/util/text"
 	"github.com/pkg/errors"
 	"regexp"
 	"strings"
@@ -14,13 +15,15 @@ func (p *Profile) GetInterfaces() (map[string]*dproto.Interface, error) {
 	interfaces := make(map[string]*dproto.Interface)
 
 	patterns := make(map[string]string)
-	patterns["ports"] = `(?m:^(\s+)?(?P<ifname>.+?)\s+is(?:\s+administratively)?\s+`+
+	/*patterns["ports"] = `(?m:^(\s+)?(?P<ifname>.+?)\s+is(?:\s+administratively)?\s+`+
 						`(?P<admin>up|down),\s+line\s+protocol\s+is\s+`+
 						`(?P<oper>up|down)(\s+)?(?:\((?:connected|notconnect|disabled|monitoring|err-disabled)\)\s*)?\n\s+`+
 						`(.*)address is (?P<mac>([0-9A-Fa-f]){4}\.([0-9A-Fa-f]){4}\.([0-9A-Fa-f]){4})(.*)\n`+
 						`(?:\s+Description:\s(?P<desc>[^\n]+)\n)?(?:\s+Internet address ((is\s(?P<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\/\d{1,2}))|([^\d]+))(\s+)?\n)?[^\n]+\n[^\n]+\n\s+`+
-						`Encapsulation\s+(?P<encaps>[^\n]+))`
+						`Encapsulation\s+(?P<encaps>[^\n]+))`*/
 	patterns["ifname"] = `^(?P<type>[a-z]{2})[a-z\-]*\s*(?P<number>\d+(/\d+(/\d+)?)?(\.\d+(/\d+)*(\.\d+)?)?(:\d+(\.\d+)*)?(/[a-z]+\d+(\.\d+)?)?(A|B)?)$`
+	patterns["name"] = `(?m:^(\s+)?(?P<ifname>.+?)\s+is(?:\s+administratively)?\s+(?P<admin>up|down),\s+line\s+protocol\s+is\s+(?P<oper>up|down)(\s+)?)`
+	patterns["desc"] = `(?m:^\s+Description:\s+(?P<desc>[^\n]+)\n)`
 	patterns["lldp"] = `(?mis:^(?P<iface>(?:Fa|Gi|Te)[^:]+?):)`
 	regexps, err := p.CompileRegexps(patterns)
 	if err != nil {
@@ -42,6 +45,51 @@ func (p *Profile) GetInterfaces() (map[string]*dproto.Interface, error) {
 	}
 	p.Debug(result)
 
+	parts, err := text.SplitByParts(result, `(?msi:^[^\s]+\s+is (administratively )?(up|down), line)`)
+	if err != nil {
+		return interfaces, errors.Wrap(err, "Cannot split output by parts")
+	}
+
+	for _, part := range parts {
+		out := p.ParseSingle(regexps["name"], part)
+		ifname := strings.Trim(out["ifname"], " ")
+		if ifname == "" {
+			p.Log("Error: empty interface name!")
+			continue
+		}
+
+		shortname, err := p.ConvertIfname(ifname, regexps["ifname"])
+		if err != nil {
+			p.Log(err.Error())
+		}
+
+		out = p.ParseSingle(regexps["desc"], part)
+		desc := strings.Trim(out["desc"], " ")
+
+		iftype := p.GetInterfaceType(shortname)
+		newInt := dproto.Interface{
+			Name:ifname,
+			Shortname:shortname,
+			Type:iftype,
+			LldpID:ifname,
+			Description:desc,
+		}
+		if iftype == dproto.InterfaceType_AGGREGATED {
+			if po, ok := pos[shortname]; ok {
+				newInt.PoMembers = po
+			} else {
+				p.Log("WARNING! Cannot find port-channel details for '%s'!", shortname)
+			}
+		}
+		/*if iftype == dproto.InterfaceType_TUNNEL {
+			continue
+		}
+		p.Debug("%s", part)*/
+
+		interfaces[ifname] = &newInt
+	}
+
+	/*
 	ports := p.ParseMultiple(regexps["ports"], result)
 	for _, port := range ports {
 		ifname := port["ifname"]
@@ -72,6 +120,7 @@ func (p *Profile) GetInterfaces() (map[string]*dproto.Interface, error) {
 
 		interfaces[ifname] = &newInt
 	}
+	*/
 
 	return interfaces, nil
 }

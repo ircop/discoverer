@@ -16,7 +16,8 @@ func (p *Profile) GetVlans() ([]*dproto.Vlan, error) {
 	patterns := make(map[string]string)
 	patterns["cut"] = `(?mis:^(?P<content>VID\s+Type.+)VID\s+Status)`
 	patterns["rmline"] = `(?mis:^-+(\s+)?\n)`
-	patterns["untags"] = `^UT:(?P<ifaces>[^$T]+)`
+	patterns["untagsWithTags"] = `^UT:(?P<ifaces>.+)TG`
+	patterns["untagsWithoutTags"] = `^UT:(?P<ifaces>.+)`
 	patterns["tags"] = `TG:(?P<ifaces>.+)`
 	patterns["ifname"] = `(?mis:(^|\s(\s+)?)(?P<ifname>[^\s\(\n]+))`
 	regexps, err := p.CompileRegexps(patterns)
@@ -50,13 +51,27 @@ func (p *Profile) GetVlans() ([]*dproto.Vlan, error) {
 			continue
 		}
 		portstring := row[2]
+		//v59: []string{"59", "common", "UT:Eth-Trunk3(U)TG:XGE0/0/48(D)    Eth-Trunk0(U)"}
+
+		// get tags first
+		o := p.ParseSingle(regexps["tags"], portstring)
+		tags := strings.Trim(o["ifaces"], " ")
+		if tags != "" {
+			o = p.ParseSingle(regexps["untagsWithTags"], portstring)
+		} else {
+			o = p.ParseSingle(regexps["untagsWithoutTags"], portstring)
+		}
+		untags := strings.Trim(o["ifaces"], " ")
+		/*p.Debug("portstring: %s", portstring)
+		p.Debug("untags: %s", untags)
+		p.Debug("tags: %s", tags)*/
 
 		// get 'UT:....'
-		o := p.ParseSingle(regexps["untags"], portstring)
-		untags := strings.Trim(o["ifaces"], " ")
+		//o := p.ParseSingle(regexps["untags"], portstring)
+		//untags := strings.Trim(o["ifaces"], " ")
 		// get 'TG:...'
-		o = p.ParseSingle(regexps["tags"], portstring)
-		tags := strings.Trim(o["ifaces"], " ")
+		//o = p.ParseSingle(regexps["tags"], portstring)
+		//tags := strings.Trim(o["ifaces"], " ")
 
 		vlan := dproto.Vlan{
 			ID:vid,

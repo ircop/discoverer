@@ -118,7 +118,7 @@ func (p *Profile) GetInterfaces() (map[string]*dproto.Interface, error) {
 		iface := dproto.Interface{
 			Name: ifname,
 			Shortname: ifname,
-			Type:dproto.InterfaceType_AGGREGATED,
+			Type:dproto.InterfaceType_SVI,
 		}
 		interfaces[ifname] = &iface
 	}

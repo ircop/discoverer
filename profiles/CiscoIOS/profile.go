@@ -21,7 +21,7 @@ func (p *Profile) Init(cli remote_cli.CliInterface, enable string, community str
 	if p.Cli != nil {
 		p.SetPrompt()
 		p.Cli.GlobalTimeout(60)
-		p.Cli.SetPrompt(`(?msi:^[a-zA-Z0-9\-_]+[\$%#>]$)`)
+		p.Cli.SetPrompt(`(?msi:^[a-zA-Z0-9\-_.]+[\$%#>]$)`)
 
 		if err := p.Cli.RegisterErrorPattern(`(% Invalid input detected at|% Ambiguous command|% Incomplete command|% Unknown command)`, "Syntax error"); err != nil {
 			return err
@@ -36,12 +36,19 @@ func (p *Profile) Init(cli remote_cli.CliInterface, enable string, community str
 			p.Cli.Write([]byte("enable"))
 			// next will be password prompt or cisco prompt
 			r, err := p.Cli.ReadUntil(`([Pp]ass[Ww]ord:|[a-zA-Z0-9\-]+[\%$%#>]$)`)
+			//fmt.Printf("-EN-\n%s\n-EN-\n", r)
 			if err != nil {
-				fmt.Printf(strings.Replace(r, "%", "%%", -1))
-				panic(err)
+				str := fmt.Sprintf(strings.Replace(r, "%", "%%", -1))
+				return fmt.Errorf("Error during enable: %s", str)
+				//panic(err)
 			} else {
-				p.Cli.Cmd(enable)
+				r, err = p.Cli.Cmd(enable)
+				//fmt.Printf("-EN2-\n%s\n-EN2-\n", r)
+				if err != nil {
+					return fmt.Errorf("Error during enable (2): %s", err.Error())
+				}
 			}
+			//p.Log("ENABLED")
 		}
 	}
 	return nil

@@ -3,6 +3,8 @@ package CiscoIOS
 import (
 	"fmt"
 	"github.com/ircop/discoverer/dproto"
+	"github.com/ircop/discoverer/util/text"
+	"github.com/pkg/errors"
 	"regexp"
 	"strconv"
 	"strings"
@@ -178,6 +180,8 @@ func (p *Profile) getRouterVlans() ([]*dproto.Vlan, error) {
 		`(?:\s+Description:\s(?P<desc>[^\n]+)\n)?(?:\s+Internet address ((is\s(?P<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\/\d{1,2}))|([^\d]+))(\s+)?\n)?[^\n]+\n[^\n]+\n\s+`+
 		`Encapsulation\s+(?P<encaps>[^\n]+))`
 	patterns["ifname"] = `^(?P<type>[a-z]{2})[a-z\-]*\s*(?P<number>\d+(/\d+(/\d+)?)?(\.\d+(/\d+)*(\.\d+)?)?(:\d+(\.\d+)*)?(/[a-z]+\d+(\.\d+)?)?(A|B)?)$`
+	//patterns["ifname"] = `(?m:^(\s+)?(?P<ifname>.+?)\s+is(?:\s+administratively)?\s+(?P<admin>up|down),\s+line\s+protocol\s+is\s+(?P<oper>up|down))`
+	patterns["name"] = `(?m:^(\s+)?(?P<ifname>.+?)\s+is(?:\s+administratively)?\s+(?P<admin>up|down),\s+line\s+protocol\s+is\s+(?P<oper>up|down)(\s+)?)`
 	patterns["encaps"] = `802\.1Q\s+Virtual\s+LAN,\s+Vlan\s+ID\s+(?P<vid>\d+)\.`
 	regexps, err := p.CompileRegexps(patterns)
 	if err != nil {
@@ -190,7 +194,49 @@ func (p *Profile) getRouterVlans() ([]*dproto.Vlan, error) {
 	}
 	p.Debug(result)
 
-	out := p.ParseMultiple(regexps["ports"], result)
+	parts, err := text.SplitByParts(result, `(?msi:^[^\s]+\s+is (up|down), line)`)
+	if err != nil {
+		return vlans, errors.Wrap(err, "Cannot split output by parts")
+	}
+	for _, part := range parts {
+		out := p.ParseSingle(regexps["name"], part)
+		ifname := strings.Trim(out["ifname"], " ")
+		if ifname == "" {
+			p.Log("Error: empty interface name!")
+			continue
+		}
+
+		out = p.ParseSingle(regexps["encaps"], part)
+		vidStr := strings.Trim(out["vid"], " ")
+		if ifname == "" || vidStr == "" {
+			continue
+		}
+
+		vid, err := strconv.ParseInt(vidStr, 10, 64)
+		if err != nil {
+			p.Log("Cannot convert vlan id '%s' to integer", vidStr)
+			continue
+		}
+
+		//p.Debug("add vlan %s to %s", vidStr, ifname)
+		if v, ok := vlanmap[vidStr]; ok {
+			v.TrunkPorts = append(v.TrunkPorts, ifname)
+			vlanmap[vidStr] = v
+		} else {
+			v := dproto.Vlan{
+				TrunkPorts: []string{ifname},
+				Name:ifname,
+				ID:vid,
+			}
+			vlanmap[vidStr] = v
+		}
+	}
+
+	/*for vstr, v := range vlanmap {
+		p.Debug("%s: %+#v", vstr, v)
+	}*/
+
+	/*out := p.ParseMultiple(regexps["ports"], result)
 	for _, part := range out {
 		ifname := strings.Trim(part["ifname"], " ")
 		encaps := strings.Trim(part["encaps"], " ")
@@ -227,10 +273,11 @@ func (p *Profile) getRouterVlans() ([]*dproto.Vlan, error) {
 			}
 			vlanmap[vid] = v
 		}
-	}
+	}*/
 
-	for _, v := range vlanmap {
-		vlans = append(vlans, &v)
+	for vstr := range vlanmap {
+		dvlan := vlanmap[vstr]
+		vlans = append(vlans, &dvlan)
 	}
 
 	return vlans, nil
