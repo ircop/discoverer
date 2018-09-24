@@ -63,7 +63,7 @@ func (p *Generic) GetInterfaceType(ifname string) dproto.InterfaceType {
 
 	if match, _ := regexp.Match(`^(ae|eth-trunk|po|bond|t\d+$)`, []byte(strings.ToLower(ifname))); match{
 		return dproto.InterfaceType_AGGREGATED
-	} else if match, _ := regexp.Match(`^(40|fa|xe|xg|ge|gi|te|et|wlan|sfp|ether)`, []byte(strings.ToLower(ifname))); match {
+	} else if match, _ := regexp.Match(`^(40|fa|xe|xg|ge|gi|te|et|wlan|sfp|ether|g)`, []byte(strings.ToLower(ifname))); match {
 		if strings.Contains(ifname, ".") {
 			return dproto.InterfaceType_SVI
 		}
