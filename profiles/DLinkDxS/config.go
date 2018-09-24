@@ -16,6 +16,9 @@ func (p *Profile) GetConfig() (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("Failed to get config: %s", err.Error())
 	}
+	if strings.Contains(result, "please input drive name first") {
+		result, err = p.Cli.Cmd("show config active")
+	}
 	//p.Debug(result)
 
 	// we should strip wrong data from this result. Starting from `Command: ....`, ending with prompt

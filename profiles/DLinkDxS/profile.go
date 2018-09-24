@@ -23,7 +23,7 @@ func (p *Profile) Init(cli remote_cli.CliInterface, enable string, community str
 		p.Cli.GlobalTimeout(60)
 		p.Cli.DlinkPagination()
 
-		if err := p.Cli.RegisterErrorPattern(`(Available commands|Next possible completions|Ambiguous token)\:`, "Syntax error"); err != nil {
+		if err := p.Cli.RegisterErrorPattern(`(ecord drive name|Available commands|Next possible completions|Ambiguous token)\:`, "Syntax error"); err != nil {
 			return err
 		}
 
@@ -40,11 +40,11 @@ func (p *Profile) Init(cli remote_cli.CliInterface, enable string, community str
 				if !strings.Contains(r, "already have") {
 					return fmt.Errorf("Cannot 'enable admin': %s", err.Error())
 				}
-			}
-
-			r, err = p.Cli.Cmd(enable)
-			if err != nil {
-				return fmt.Errorf("Cannot 'enable admin': %s", err.Error())
+			} else {
+				r, err = p.Cli.Cmd(enable)
+				if err != nil {
+					return fmt.Errorf("Cannot 'enable admin': %s", err.Error())
+				}
 			}
 		}
 	}

@@ -17,7 +17,7 @@ func (p *Profile) Init(cli remote_cli.CliInterface, enable string, community str
 		return err
 	}
 	if cli != nil {
-		p.Cli.GlobalTimeout(60)
+		p.Cli.GlobalTimeout(200)
 		p.Cli.SetPrompt(`(?msi:^(({master(?::\d+)}\n)?\S+(>|#))\s*$)`)
 		if err := p.Cli.RegisterErrorPattern(`(is ambiguous\.|syntax error, expecting|unknown command)`, "Syntax error"); err != nil {
 			return err

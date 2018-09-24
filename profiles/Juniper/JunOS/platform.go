@@ -16,7 +16,7 @@ func (p *Profile) GetPlatform() (dproto.Platform, error) {
 	platform.Macs = make([]string, 0)
 
 	patterns := make(map[string]string)
-	patterns["platform"] = `(?ms:Model:\s+(?P<platform>\S+)\nJunos:\s+(?P<version>[^\n]+))`
+	patterns["platform"] = `(?ms:Model:\s+(?P<platform>\S+)\n(Junos:\s+(?P<version>[^\n]+)|JUNOS Base OS boot \[(?P<version2>[^\]]+)\]))`
 	patterns["serial"] = `(?m:^Chassis\s+(?P<revision>REV \d+)?\s+(?P<serial>\S+)\s+(?P<rest>.+)$)`
 	regexps, err := p.CompileRegexps(patterns)
 	if err != nil {
@@ -32,6 +32,9 @@ func (p *Profile) GetPlatform() (dproto.Platform, error) {
 	out := p.ParseSingle(regexps["platform"], result)
 	model := strings.Trim(out["platform"], " ")
 	ver := strings.Trim(out["version"], " ")
+	if ver == "" {
+		ver = strings.Trim(out["version2"], " ")
+	}
 	if model == "" || ver == "" {
 		return platform, fmt.Errorf("Cannot parse model/version (%s/%s)", model, ver)
 	}
