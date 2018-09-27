@@ -3,6 +3,7 @@ package DLinkDxS
 import (
 	"fmt"
 	"github.com/ircop/discoverer/dproto"
+	"github.com/ircop/discoverer/util/mac"
 	"regexp"
 	"strings"
 )
@@ -188,7 +189,11 @@ func (p *Profile) lldpLocalPorts() map[string]string {
 			continue
 		}
 
-		data[name] = id
+		if Mac.IsMac(id) {
+			data[name] = Mac.New(id).String()
+		} else {
+			data[name] = id
+		}
 	}
 
 	return data

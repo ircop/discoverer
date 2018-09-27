@@ -16,6 +16,8 @@ func (p *Profile) GetPlatform() (dproto.Platform, error) {
 	patterns["ver"] = `(?ms:Huawei Versatile Routing Platform .+ \((?P<model>[A-Z0-9]+) (?P<version>[A-Z0-9]+))\)`
 	patterns["mainboard"] = `(?msi:\[(?:Main_Board|BackPlane_0)\].+?\n\n\[Board\sProperties\](?P<body>.*?)\n\n)`
 	patterns["serial"] = `(?msi:BarCode=(?P<serial>[^\n]+))`
+	patterns["mac1"] = `MAC address[^:]*?:\s*(?P<id>\S+)`
+	patterns["mac2"] = `CIST Bridge\s+:\d+\s*\.(?P<id>\S+)`
 	regexps, err := p.CompileRegexps(patterns)
 	if err != nil {
 		return platform, err
@@ -36,6 +38,17 @@ func (p *Profile) GetPlatform() (dproto.Platform, error) {
 	platform.Model = model
 	platform.Version = ver
 
+	// discover macs
+	out = p.ParseSingle(regexps["mac1"], result)
+	if out["id"] == "" {
+		out = p.ParseSingle(regexps["mac2"], result)
+	}
+	if out["id"] != "" {
+		macstr := strings.Replace(out["id"], "-", ".", -1)
+		platform.Macs = []string{macstr}
+	}
+
+
 	result, err = p.Cli.Cmd("display elabel")
 	if err != nil {
 		return platform, err
@@ -50,6 +63,7 @@ func (p *Profile) GetPlatform() (dproto.Platform, error) {
 		p.Log("Warning! Cannot parse serial.")
 	}
 	platform.Serial = serial
+
 
 	return platform, nil
 }
