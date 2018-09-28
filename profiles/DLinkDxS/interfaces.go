@@ -10,7 +10,7 @@ import (
 
 // GetInterfaces for DLinkDxS profile
 func (p *Profile) GetInterfaces() (map[string]*dproto.Interface, error) {
-	p.Debug("Starting DLinkDxS.GetInterfaces()")
+	p.Log("Starting DLinkDxS.GetInterfaces()")
 
 	interfaces := make(map[string]*dproto.Interface)
 

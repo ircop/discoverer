@@ -39,15 +39,17 @@ func (p *Profile) GetPlatform() (dproto.Platform, error) {
 	platform.Version = ver
 
 	// discover macs
+	result, _ = p.Cli.Cmd("display stp")
 	out = p.ParseSingle(regexps["mac1"], result)
 	if out["id"] == "" {
+		p.Debug("MAC1 = ''")
 		out = p.ParseSingle(regexps["mac2"], result)
 	}
 	if out["id"] != "" {
+		p.Debug("MAC2 != ''")
 		macstr := strings.Replace(out["id"], "-", ".", -1)
 		platform.Macs = []string{macstr}
 	}
-
 
 	result, err = p.Cli.Cmd("display elabel")
 	if err != nil {
