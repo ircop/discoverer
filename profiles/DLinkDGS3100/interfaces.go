@@ -2,7 +2,7 @@ package DLinkDGS3100
 
 import (
 	"fmt"
-	"github.com/ircop/discoverer/dproto"
+	"github.com/ircop/dproto"
 	"github.com/ircop/discoverer/util/text"
 	"regexp"
 	"strconv"
@@ -33,10 +33,10 @@ import (
 		}
 
 		newInt := dproto.Interface{
-			Name: ifname,
-			Shortname: ifname,
-			Description:desc,
-			Type: dproto.InterfaceType_PHISYCAL,
+			Name:        ifname,
+			Shortname:   ifname,
+			Description: desc,
+			Type:        dproto.InterfaceType_PHISYCAL,
 		}
 		interfaces[ifname] = &newInt
 	}
@@ -63,11 +63,11 @@ import (
 		}
 		ifaces := p.ExpandInterfaceRange(ports)
 		newInt := dproto.Interface{
-			Name: "ch"+gid,
+			Name:      "ch"+gid,
 			Shortname: "ch"+gid,
-			LldpID: "ch"+gid,
+			LldpID:    "ch"+gid,
 			PoMembers: ifaces,
-			Type:dproto.InterfaceType_AGGREGATED,
+			Type:      dproto.InterfaceType_AGGREGATED,
 		}
 		interfaces["ch"+gid] = &newInt
 	}

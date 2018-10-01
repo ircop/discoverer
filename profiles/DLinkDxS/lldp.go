@@ -1,7 +1,7 @@
 package DLinkDxS
 
 import (
-	"github.com/ircop/discoverer/dproto"
+	"github.com/ircop/dproto"
 	"github.com/pkg/errors"
 	"fmt"
 	//"regexp"

@@ -2,7 +2,7 @@ package CiscoIOS
 
 import (
 	"fmt"
-	"github.com/ircop/discoverer/dproto"
+	"github.com/ircop/dproto"
 	"github.com/ircop/discoverer/util/mac"
 	"github.com/pkg/errors"
 	"regexp"

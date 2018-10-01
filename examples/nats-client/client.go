@@ -12,9 +12,9 @@ import (
 
 var TasksPool sync.Map
 type WaitingTask struct {
-	RequestID		string
-	Type			dproto.PacketType
-	Timer			*time.Timer
+	RequestID string
+	Type      __dproto.PacketType
+	Timer     *time.Timer
 }
 
 var glock sync.Mutex
@@ -43,16 +43,16 @@ func main() {
 		return
 	}
 
-	go sendTask(natsConn, dproto.PacketType_PLATFORM, "10.170.3.99", dproto.Protocol_TELNET, dproto.ProfileType_DXS)
-	go sendTask(natsConn, dproto.PacketType_INTERFACES, "10.170.3.99", dproto.Protocol_TELNET, dproto.ProfileType_DXS)
-	go sendTask(natsConn, dproto.PacketType_PLATFORM, "10.10.10.248", dproto.Protocol_TELNET, dproto.ProfileType_DXS)
-	go sendTask(natsConn, dproto.PacketType_IPS, "10.10.10.248", dproto.Protocol_TELNET, dproto.ProfileType_DXS)
-	go sendTask(natsConn, dproto.PacketType_INTERFACES, "10.10.10.150", dproto.Protocol_TELNET, dproto.ProfileType_DXS)
-	go sendTask(natsConn, dproto.PacketType_PLATFORM, "10.170.3.99", dproto.Protocol_TELNET, dproto.ProfileType_DXS)
-	go sendTask(natsConn, dproto.PacketType_INTERFACES, "10.170.3.99", dproto.Protocol_TELNET, dproto.ProfileType_DXS)
-	go sendTask(natsConn, dproto.PacketType_PLATFORM, "10.10.10.248", dproto.Protocol_TELNET, dproto.ProfileType_DXS)
-	go sendTask(natsConn, dproto.PacketType_IPS, "10.10.10.248", dproto.Protocol_TELNET, dproto.ProfileType_DXS)
-	go sendTask(natsConn, dproto.PacketType_INTERFACES, "10.10.10.150", dproto.Protocol_TELNET, dproto.ProfileType_DXS)
+	go sendTask(natsConn, __dproto.PacketType_PLATFORM, "10.170.3.99", __dproto.Protocol_TELNET, __dproto.ProfileType_DXS)
+	go sendTask(natsConn, __dproto.PacketType_INTERFACES, "10.170.3.99", __dproto.Protocol_TELNET, __dproto.ProfileType_DXS)
+	go sendTask(natsConn, __dproto.PacketType_PLATFORM, "10.10.10.248", __dproto.Protocol_TELNET, __dproto.ProfileType_DXS)
+	go sendTask(natsConn, __dproto.PacketType_IPS, "10.10.10.248", __dproto.Protocol_TELNET, __dproto.ProfileType_DXS)
+	go sendTask(natsConn, __dproto.PacketType_INTERFACES, "10.10.10.150", __dproto.Protocol_TELNET, __dproto.ProfileType_DXS)
+	go sendTask(natsConn, __dproto.PacketType_PLATFORM, "10.170.3.99", __dproto.Protocol_TELNET, __dproto.ProfileType_DXS)
+	go sendTask(natsConn, __dproto.PacketType_INTERFACES, "10.170.3.99", __dproto.Protocol_TELNET, __dproto.ProfileType_DXS)
+	go sendTask(natsConn, __dproto.PacketType_PLATFORM, "10.10.10.248", __dproto.Protocol_TELNET, __dproto.ProfileType_DXS)
+	go sendTask(natsConn, __dproto.PacketType_IPS, "10.10.10.248", __dproto.Protocol_TELNET, __dproto.ProfileType_DXS)
+	go sendTask(natsConn, __dproto.PacketType_INTERFACES, "10.10.10.150", __dproto.Protocol_TELNET, __dproto.ProfileType_DXS)
 
 
 	select{}
@@ -61,7 +61,7 @@ func main() {
 func handleResponse(msg *nats.Msg) {
 	defer msg.Ack()
 
-	var response dproto.Response
+	var response __dproto.Response
 	err := proto.Unmarshal(msg.Data, &response)
 	if err != nil {
 		fmt.Printf("Cannot unmarshal response: %s\n", err.Error())
@@ -79,20 +79,20 @@ func handleResponse(msg *nats.Msg) {
 
 	TasksPool.Delete(id)
 
-	if response.Type == dproto.PacketType_ERROR {
+	if response.Type == __dproto.PacketType_ERROR {
 		fmt.Printf("Error (%s): %s\n", id, response.Error)
 		return
 	}
 
 	switch response.Type {
-	case dproto.PacketType_PLATFORM:
-		if err, ok := response.Errors[dproto.PacketType_PLATFORM.String()]; ok {
+	case __dproto.PacketType_PLATFORM:
+		if err, ok := response.Errors[__dproto.PacketType_PLATFORM.String()]; ok {
 			fmt.Printf("Platform request resulted with error: %s", err)
 		}
 		fmt.Printf("Platform: %+#v\n", response.Platform)
 		break
-	case dproto.PacketType_INTERFACES:
-		if err, ok := response.Errors[dproto.PacketType_INTERFACES.String()]; ok {
+	case __dproto.PacketType_INTERFACES:
+		if err, ok := response.Errors[__dproto.PacketType_INTERFACES.String()]; ok {
 			fmt.Printf("Interfaces request resulted with error: %s", err)
 		}
 		//for _, iface := range response.Interfaces {
@@ -100,14 +100,14 @@ func handleResponse(msg *nats.Msg) {
 		//}
 		fmt.Printf("got %d ifaces\n", len(response.Interfaces))
 		break
-	case dproto.PacketType_CONFIG:
-		if err, ok := response.Errors[dproto.PacketType_CONFIG.String()]; ok {
+	case __dproto.PacketType_CONFIG:
+		if err, ok := response.Errors[__dproto.PacketType_CONFIG.String()]; ok {
 			fmt.Printf("Config request resulted with error: %s", err)
 		}
 		fmt.Printf("Config: %+#v\n", response.Config)
 		break
-	case dproto.PacketType_IPS:
-		if err, ok := response.Errors[dproto.PacketType_IPS.String()]; ok {
+	case __dproto.PacketType_IPS:
+		if err, ok := response.Errors[__dproto.PacketType_IPS.String()]; ok {
 			fmt.Printf("Ips request resulted with error: %s", err)
 		}
 		//for _, ipif := range response.Ipifs {
@@ -115,8 +115,8 @@ func handleResponse(msg *nats.Msg) {
 		//}
 		fmt.Printf("got %d ipifs\n", len(response.Ipifs))
 		break
-	case dproto.PacketType_LLDP:
-		if err, ok := response.Errors[dproto.PacketType_LLDP.String()]; ok {
+	case __dproto.PacketType_LLDP:
+		if err, ok := response.Errors[__dproto.PacketType_LLDP.String()]; ok {
 			fmt.Printf("LLDP request resulted with error: %s", err)
 		}
 		//for _, lldp := range response.LldpNeighbors {
@@ -124,16 +124,16 @@ func handleResponse(msg *nats.Msg) {
 		//}
 		fmt.Printf("got %d neighbors\n", len(response.LldpNeighbors))
 		break
-	case dproto.PacketType_VLANS:
-		if err, ok := response.Errors[dproto.PacketType_VLANS.String()]; ok {
+	case __dproto.PacketType_VLANS:
+		if err, ok := response.Errors[__dproto.PacketType_VLANS.String()]; ok {
 			fmt.Printf("Vlan request resulted with error: %s", err)
 		}
 		for _, v := range response.Vlans {
 			fmt.Printf("vlan: %+#v\n", v)
 		}
 		break
-	case dproto.PacketType_UPLINK:
-		if err, ok := response.Errors[dproto.PacketType_UPLINK.String()]; ok {
+	case __dproto.PacketType_UPLINK:
+		if err, ok := response.Errors[__dproto.PacketType_UPLINK.String()]; ok {
 			fmt.Printf("Uplink request resulted with error: %s", err)
 		}
 		fmt.Printf("Uplink: '%s'\n", response.Uplink)
@@ -145,14 +145,14 @@ func handleResponse(msg *nats.Msg) {
 }
 
 //func sendTask(conn *nats.Conn, taskType discoverproto.TaskType, host string, protocol discoverproto.Proto, profile discoverproto.ProfileType) {
-func sendTask(conn nats.Conn, taskType dproto.PacketType, host string, protocol dproto.Protocol, profile dproto.ProfileType) {
+func sendTask(conn nats.Conn, taskType __dproto.PacketType, host string, protocol __dproto.Protocol, profile __dproto.ProfileType) {
 	id, _ := uuid.NewRandom()
 	port := 22
-	if protocol == dproto.Protocol_TELNET {
+	if protocol == __dproto.Protocol_TELNET {
 		port = 23
 	}
 
-	message := dproto.TaskRequest{
+	message := __dproto.TaskRequest{
 		RequestID:id.String(),
 		Timeout: 60,
 		Login:"login",

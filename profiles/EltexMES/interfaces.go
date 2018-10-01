@@ -2,7 +2,7 @@ package EltexMES
 
 import (
 	"fmt"
-	"github.com/ircop/discoverer/dproto"
+	"github.com/ircop/dproto"
 	"github.com/ircop/discoverer/util/text"
 	"regexp"
 	"strings"
@@ -38,11 +38,11 @@ func (p *Profile) GetInterfaces() (map[string]*dproto.Interface, error) {
 				continue
 			}
 			iface := dproto.Interface{
-				Name:ifname,
-				Description:desc,
-				Type:dproto.InterfaceType_PHISYCAL,
-				Shortname:ifname,
-				LldpID:ifname,
+				Name:        ifname,
+				Description: desc,
+				Type:        dproto.InterfaceType_PHISYCAL,
+				Shortname:   ifname,
+				LldpID:      ifname,
 			}
 			interfaces[ifname] = &iface
 		}
@@ -71,12 +71,12 @@ func (p *Profile) GetInterfaces() (map[string]*dproto.Interface, error) {
 		}
 		iflist := p.ExpandInterfaceRange(ifaces)
 		iface := dproto.Interface{
-			Name:ifname,
+			Name:        ifname,
 			Description: poDescriptions[ifname],
-			LldpID:ifname,
-			Shortname:ifname,
-			Type:dproto.InterfaceType_AGGREGATED,
-			PoMembers:iflist,
+			LldpID:      ifname,
+			Shortname:   ifname,
+			Type:        dproto.InterfaceType_AGGREGATED,
+			PoMembers:   iflist,
 		}
 		interfaces[ifname] = &iface
 	}
@@ -116,9 +116,9 @@ func (p *Profile) GetInterfaces() (map[string]*dproto.Interface, error) {
 		}
 		ifname = strings.Replace(ifname, " ", "", -1)
 		iface := dproto.Interface{
-			Name: ifname,
+			Name:      ifname,
 			Shortname: ifname,
-			Type:dproto.InterfaceType_SVI,
+			Type:      dproto.InterfaceType_SVI,
 		}
 		interfaces[ifname] = &iface
 	}

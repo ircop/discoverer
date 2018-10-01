@@ -1,7 +1,7 @@
 package RouterOS
 
 import (
-	"github.com/ircop/discoverer/dproto"
+	"github.com/ircop/dproto"
 	"strings"
 )
 

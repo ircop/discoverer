@@ -1,7 +1,7 @@
 package discoverer
 
 import (
-	"github.com/ircop/discoverer/dproto"
+	"github.com/ircop/dproto"
 	"github.com/ircop/remote-cli"
 	"fmt"
 )
@@ -13,13 +13,13 @@ type Profile interface {
 	SetCallbacks() (error)
 	SetPrompt()
 
-	GetPlatform() (dproto.Platform, error)					// dlink|cisco|mes|3100|jun|hua
-	GetInterfaces() (map[string]*dproto.Interface, error)	// dlink|cisco|mes|3100|jun|hua
-	GetLldp() ([]*dproto.LldpNeighbor, error)				// dlink|cisco|mes|3100|jun|hua
-	GetVlans() ([]*dproto.Vlan, error)						// dlink|cisco|mes|3100|jun|hua
-	GetIps() ([]*dproto.Ipif, error)					// dlink|cisco|mes|3100|jun|hua
-	GetUplink() (string, error)						// dlink|cisco|mes|3100|jun|hua-
-	GetConfig() (string, error)						// dlink|cisco|mes|3100|jun|hua
+	GetPlatform() (dproto.Platform, error)                // dlink|cisco|mes|3100|jun|hua
+	GetInterfaces() (map[string]*dproto.Interface, error) // dlink|cisco|mes|3100|jun|hua
+	GetLldp() ([]*dproto.LldpNeighbor, error)             // dlink|cisco|mes|3100|jun|hua
+	GetVlans() ([]*dproto.Vlan, error)                    // dlink|cisco|mes|3100|jun|hua
+	GetIps() ([]*dproto.Ipif, error)                      // dlink|cisco|mes|3100|jun|hua
+	GetUplink() (string, error)                             // dlink|cisco|mes|3100|jun|hua-
+	GetConfig() (string, error)                             // dlink|cisco|mes|3100|jun|hua
 
 	SetLogger(func(string, ...interface{}))
 	SetDebugLogger(func(string, ...interface{}))

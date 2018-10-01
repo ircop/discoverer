@@ -2,7 +2,7 @@ package DLinkDxS
 
 import (
 	"fmt"
-	"github.com/ircop/discoverer/dproto"
+	"github.com/ircop/dproto"
 	"github.com/ircop/discoverer/util/mac"
 	"regexp"
 	"strings"
@@ -48,11 +48,11 @@ func (p *Profile) GetInterfaces() (map[string]*dproto.Interface, error) {
 
 		// todo: states and speeds will be collected in periodic discoveries, not here
 		newInt := dproto.Interface{
-			Name: strings.Trim(port["port"], " "),
-			Shortname: strings.Trim(port["port"], " "),
+			Name:        strings.Trim(port["port"], " "),
+			Shortname:   strings.Trim(port["port"], " "),
 			Description: strings.Trim(port["desc"], " "),
-			Type: dproto.InterfaceType_PHISYCAL,
-			LldpID: name,
+			Type:        dproto.InterfaceType_PHISYCAL,
+			LldpID:      name,
 		}
 		if id, ok := portIds[name]; ok {
 			newInt.LldpID = id
@@ -72,9 +72,9 @@ func (p *Profile) GetInterfaces() (map[string]*dproto.Interface, error) {
 		}
 
 		newInt := dproto.Interface{
-			Name: name,
+			Name:      name,
 			Shortname: name,
-			Type: dproto.InterfaceType_AGGREGATED,
+			Type:      dproto.InterfaceType_AGGREGATED,
 			PoMembers: portMembers,
 		}
 		interfaces[name] = &newInt
@@ -86,10 +86,10 @@ func (p *Profile) GetInterfaces() (map[string]*dproto.Interface, error) {
 	}
 	for name, _ := range ipifs {
 		newInt := dproto.Interface{
-			Name:name,
-			Shortname:name,
-			Type:dproto.InterfaceType_SVI,
-			LldpID:name,
+			Name:      name,
+			Shortname: name,
+			Type:      dproto.InterfaceType_SVI,
+			LldpID:    name,
 		}
 		interfaces[name] = &newInt
 	}

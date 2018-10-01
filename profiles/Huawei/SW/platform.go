@@ -2,7 +2,7 @@ package HuaweiSW
 
 import (
 	"fmt"
-	"github.com/ircop/discoverer/dproto"
+	"github.com/ircop/dproto"
 	"strings"
 )
 

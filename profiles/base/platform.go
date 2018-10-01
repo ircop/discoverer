@@ -2,7 +2,7 @@ package discoverer
 
 import (
 	"fmt"
-	"github.com/ircop/discoverer/dproto"
+	"github.com/ircop/dproto"
 )
 
 // Platform struct contains unified results of GetPlatform() method

@@ -1,7 +1,7 @@
 package EltexMES
 
 import (
-	"github.com/ircop/discoverer/dproto"
+	"github.com/ircop/dproto"
 	"github.com/ircop/discoverer/util/text"
 	"github.com/pkg/errors"
 	"strings"

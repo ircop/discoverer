@@ -2,7 +2,7 @@ package DLinkDxS
 
 import (
 	"fmt"
-	"github.com/ircop/discoverer/dproto"
+	"github.com/ircop/dproto"
 	"net"
 	"regexp"
 )

@@ -2,7 +2,7 @@ package RouterOS
 
 import (
 	"fmt"
-	"github.com/ircop/discoverer/dproto"
+	"github.com/ircop/dproto"
 	"net"
 	"strings"
 )
