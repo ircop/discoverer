@@ -6,9 +6,14 @@ import (
 	"github.com/ircop/discoverer/cfg"
 	"github.com/ircop/discoverer/logger"
 	"github.com/ircop/discoverer/streamer"
+	"log"
+	"net/http"
+	_ "net/http/pprof"
 )
 
 func main() {
+	go dbg()
+
 	configPath := flag.String("c", "./discoverer.toml", "Config file location")
 	flag.Parse()
 
@@ -32,4 +37,8 @@ func main() {
 	}
 
 	select{}
+}
+
+func dbg() {
+	log.Println(http.ListenAndServe("10.10.10.141:6060", nil))
 }
