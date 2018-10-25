@@ -10,7 +10,7 @@ import (
 func (p *Profile) GetConfig() (string, error) {
 	p.Debug("Starting JunOS.GetConfig()")
 
-	reConfig, err := regexp.Compile(`(?ms:## Last[^\n]+\n(?P<config>.+)\{master)`)
+	reConfig, err := regexp.Compile(`(?ms:## Last[^\n]+\n(?P<config>.+)(\{master|\[edit))`)
 	if err != nil {
 		return "", fmt.Errorf("Cannot compile config regex: %s", err.Error())
 	}
