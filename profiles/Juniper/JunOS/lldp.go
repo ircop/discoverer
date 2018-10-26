@@ -24,7 +24,7 @@ func (p *Profile) GetLldp() ([]*dproto.LldpNeighbor, error) {
 		return neighbors, fmt.Errorf("Cannot compile neighbor regex: %s", err.Error())
 	}
 
-	rows := text.ParseTable(result, `^Local`, "", true)
+	rows := text.ParseTable(result, `^Local`, "", true, false)
 	for _, row := range rows {
 		ifname := strings.Trim(row[0], " ")
 		ifname = strings.Replace(ifname, ".0", "", -1)

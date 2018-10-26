@@ -18,7 +18,7 @@ func (p *Profile) GetLldp() ([]*dproto.LldpNeighbor, error) {
 	}
 	p.Debug(result)
 
-	rows := text.ParseTable(result, "^-----", "", false)
+	rows := text.ParseTable(result, "^-----", "", false, false)
 	for _, row := range rows {
 		if len(row) < 3 {
 			continue

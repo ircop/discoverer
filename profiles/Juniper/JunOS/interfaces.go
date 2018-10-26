@@ -34,7 +34,7 @@ func (p *Profile) GetInterfaces() (map[string]*dproto.Interface, error) {
 		return interfaces, fmt.Errorf("Cannot compile ifstring regex: %s", err.Error())
 	}
 
-	rows := text.ParseTable(result, `Interface\s+`, "", true)
+	rows := text.ParseTable(result, `Interface\s+`, "", true, false)
 	for _, row := range rows {
 		if len(row) < 4 {
 			p.Log("Warning! Interfaces row len is %d", len(row))
@@ -99,7 +99,7 @@ func (p *Profile) GetInterfaces() (map[string]*dproto.Interface, error) {
 		return interfaces, fmt.Errorf("Cannot 'show interfaces descriptions': %s", err.Error())
 	}
 	p.Debug(result)
-	rows = text.ParseTable(result, `Interface\s+`, "", true)
+	rows = text.ParseTable(result, `Interface\s+`, "", true, false)
 	for _, row := range rows {
 		if len(row) < 4 {
 			p.Log("Warning: row len < 4")

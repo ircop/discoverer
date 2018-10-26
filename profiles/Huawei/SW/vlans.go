@@ -40,7 +40,7 @@ func (p *Profile) GetVlans() ([]*dproto.Vlan, error) {
 	p.Debug(result)
 
 
-	rows := text.ParseTable(result, `^VID\s+Type\s+Ports`, "", false)
+	rows := text.ParseTable(result, `^VID\s+Type\s+Ports`, "", false, false)
 	for _, row := range rows {
 		if len(row) < 3 {
 			continue

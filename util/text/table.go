@@ -20,7 +20,7 @@ import (
 // t: text to parse
 // header: header matching regex
 // footer: footer matching regex
-func ParseTable(t string, header string, footer string, exceeding bool) [][]string {
+func ParseTable(t string, header string, footer string, exceeding bool, dontTrimPrevLine bool) [][]string {
 	rows := make([][]string, 0)
 
 	// we NEED a header regex
@@ -79,7 +79,11 @@ func ParseTable(t string, header string, footer string, exceeding bool) [][]stri
 			lastRowIdx := len(rows)-1
 			for i := range cols {
 				//cols[i] = strings.TrimRight(cols[i], " ")
-				rows[lastRowIdx][i] += cols[i]
+				if dontTrimPrevLine {
+					rows[lastRowIdx][i] += " " + cols[i]
+				} else {
+					rows[lastRowIdx][i] += cols[i]
+				}
 			}
 		}
 	}

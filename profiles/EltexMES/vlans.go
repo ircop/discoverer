@@ -18,7 +18,7 @@ func (p *Profile) GetVlans() ([]*dproto.Vlan, error) {
 	}
 	p.Debug(result)
 
-	rows := text.ParseTable(result, "^--", "", false)
+	rows := text.ParseTable(result, "^--", "", false, false)
 
 	for _, row := range rows {
 		vidStr := row[0]

@@ -29,7 +29,7 @@ func (p *Profile) GetIps() ([]*dproto.Ipif, error) {
 		return ipifs, fmt.Errorf("Cannot compile if skip regex: %s", err.Error())
 	}
 
-	rows := text.ParseTable(result, `Interface\s+`, "", true)
+	rows := text.ParseTable(result, `Interface\s+`, "", true, false)
 	for _, row := range rows {
 		if len(row) < 4 {
 			p.Log("Warning! Interfaces row len is %d", len(row))
