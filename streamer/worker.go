@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes/any"
+	"github.com/ircop/discoverer/profiles/QtechQSW"
 	"github.com/ircop/dproto"
 
 	"github.com/ircop/discoverer/logger"
@@ -87,11 +88,15 @@ func workerCallback(msg *nats.Msg, chanReplies string) {
 	case dproto.ProfileType_ROUTEROS:
 		sw = &RouterOS.Profile{}
 		break
+	case dproto.ProfileType_QTECH:
+		sw = &QtechQSW.Profile{}
+		break
 	default:
 		logger.Err("Failed to map device profile: '%v'", req.Profile.String())
 		sendError(conn, chanReplies, RequestID, fmt.Sprintf("Failed to map device profile: %+#v", req.Profile.String()))
 		return
 	}
+	sw.SetAddr(req.Host)
 
 	sw.SetLogger(logger.Log)
 	sw.SetDebugLogger(logger.Debug)

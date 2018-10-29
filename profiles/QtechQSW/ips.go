@@ -43,7 +43,7 @@ func (p *Profile) GetIps() ([]*dproto.Ipif, error) {
 		o := p.ParseMultiple(regexps["ips"], r)
 		for n := range o {
 			ipStr := o[n]["ip"]
-			maskStr := o[n]["ip"]
+			maskStr := o[n]["mask"]
 			ip := net.ParseIP(ipStr)
 			mask := net.ParseIP(maskStr)
 			if ip == nil || mask == nil {

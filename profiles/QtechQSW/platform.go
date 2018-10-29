@@ -18,10 +18,11 @@ func (p *Profile) GetPlatform() (dproto.Platform, error) {
 	p.Debug(result)
 
 	patterns := make(map[string]string,0)
-	patterns["model"] = `^\s*(?:Device: )?(?P<model>\S+)(?: Device|, sysLocation\:).+\n`
+	patterns["model"] = `(?msi:^\s*(?:Device: )?(?P<model>\S+)(?: Device|, sysLocation\:).+\n)`
 	patterns["version"] = `(?msi:^\s*SoftWare(?: Package)? Version\s+(?P<version>[^\n^\(]+)(?:\(\S+\))?\n)`
 	patterns["revision"] = `(?msi:^\s*Hardware(?: Package)? Version\s+(?P<revision>[^\n^\(]+)(?:\(\S+\))?\n)`
 	patterns["mac"] = `Vlan MAC\s+(?P<mac>[^\n]+)\n`
+	patterns["mac2"] = `CPU Mac\s+(?P<mac>[^\n]+)\n`
 	patterns["serial"] = `Serial No\.:(\s+)?(?P<serial>[^\n]+)\n`
 	regexps, err := p.CompileRegexps(patterns)
 	if err != nil {
@@ -38,6 +39,11 @@ func (p *Profile) GetPlatform() (dproto.Platform, error) {
 	platform.Serial = strings.Trim(out["serial"], " ")
 	out = p.ParseSingle(regexps["mac"], result)
 	m := Mac.New(out["mac"])
+	if m != nil {
+		platform.Macs = append(platform.Macs, m.String())
+	}
+	out = p.ParseSingle(regexps["mac2"], result)
+	m = Mac.New(out["mac"])
 	if m != nil {
 		platform.Macs = append(platform.Macs, m.String())
 	}

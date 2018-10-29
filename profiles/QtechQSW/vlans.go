@@ -12,12 +12,6 @@ func (p *Profile) GetVlans() ([]*dproto.Vlan, error) {
 	p.Log("Starting QtechQSW.GetVlans()")
 	vlans := make([]*dproto.Vlan, 0)
 
-	/*patterns := make(map[string]string)
-	regexps, err := p.CompileRegexps(patterns)
-	if err != nil {
-		return vlans, err
-	}*/
-
 	result, err := p.Cli.Cmd("show vlan")
 	if err != nil {
 		return vlans, err
@@ -58,7 +52,7 @@ func (p *Profile) GetVlans() ([]*dproto.Vlan, error) {
 		}
 		vlans = append(vlans, &vlan)
 	}
-	//p.Debug("rows: %+#v", len(rows))
+
 
 	return vlans, nil
 }

@@ -35,12 +35,19 @@ func (p *Profile) GetInterfaces() (map[string]*dproto.Interface, error) {
 
 		t := p.GetInterfaceType(ifname)
 
+		lldpID := ifname
+		if strings.Contains(ifname, "/") {
+			exp := strings.Split(ifname, "/")
+			if len(exp) > 1 {
+				lldpID = exp[1]
+			}
+		}
 
 		iface := dproto.Interface{
 			Shortname:ifname,
 			Name:ifname,
 			Type:t,
-			LldpID:ifname,
+			LldpID:lldpID,
 		}
 		if t == dproto.InterfaceType_AGGREGATED {
 			iface.PoMembers = make([]string, 0)

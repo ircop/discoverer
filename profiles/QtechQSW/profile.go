@@ -17,10 +17,11 @@ func (p *Profile) Init(cli remote_cli.CliInterface, enable string, community str
 
 	if cli != nil {
 		p.Cli.SetLoginPrompt(`([Uu]ser(\s)?[Nn]ame\:(\s+)|login:)?$`)
+		p.Cli.SetPrompt(`(?msi:^(?P<hostname>[a-zA-Z0-9]\S{0,19})(?:[\.\-_\d\w]+)?(?:\(config[^\)]*\))?#)`)
 		p.SetPrompt()
 		p.Cli.GlobalTimeout(60)
 
-		if err := p.Cli.RegisterErrorPattern(`(% Unrecognized | % Invalid|% Ambiguous|% Incomplete|% Unknown)`, "Syntax error"); err != nil {
+		if err := p.Cli.RegisterErrorPattern(`(Unrecognized |Invalid|Invalid input|Ambiguous)`, "Syntax error"); err != nil {
 			return err
 		}
 

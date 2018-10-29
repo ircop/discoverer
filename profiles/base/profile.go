@@ -12,6 +12,7 @@ type Profile interface {
 	InitShared(remote_cli.CliInterface, string, string) error
 	SetCallbacks() (error)
 	SetPrompt()
+	SetAddr(string)
 
 	GetPlatform() (dproto.Platform, error)                // dlink|cisco|mes|3100|jun|hua
 	GetInterfaces() (map[string]*dproto.Interface, error) // dlink|cisco|mes|3100|jun|hua
@@ -33,6 +34,7 @@ var ErrNotImplemented = fmt.Errorf("Method not implemented")
 // Cli in connected state should be passed in Init
 type Generic struct {
 	Profile
+	Addr			string
 	//device			discoverer.DeviceProfile
 	Cli				remote_cli.CliInterface
 	Community		string
@@ -110,4 +112,8 @@ func (p *Generic) Debug(msg string, args ...interface{}) {
 		//msg = strings.Replace(msg, "%", "%%", -1)
 		p.loggerDebug(msg, args...)
 	}
+}
+
+func (p *Generic) SetAddr(addr string) {
+	p.Addr = addr
 }
