@@ -6,7 +6,6 @@ import (
 
 	//"github.com/ircop/discoverer/util/text"
 	"github.com/ircop/discoverer/util/text"
-	"regexp"
 	"strings"
 )
 
@@ -18,6 +17,16 @@ func (p *Profile) GetInterfaces() (map[string]*dproto.Interface, error) {
 	// run TERSE: get all active interfaces ; cut %.0 ; remember them
 	// run DESCRIPTIONS: get descriptions for collected interfaces
 
+	patterns := make(map[string]string, 0)
+	patterns["po"] = `(?msi:(\s+)?Link:(\s+)?\n(?P<ifaces>.+)(\n+)\s+Aggregate)`
+	patterns["ifstring"] = `(\s+)?(?P<iface>[^\s]+)`
+	patterns["replace"] = `(?msi:^\s+(Input|Output)([^\n]+))`
+	patterns["replace_unit"] = `(?msi:(\.\d+))`
+	regexps, err := p.CompileRegexps(patterns)
+	if err != nil {
+		return interfaces, err
+	}
+
 	// -- terse --
 	result, err := p.Cli.Cmd("show interfaces terse")
 	if err != nil {
@@ -25,14 +34,14 @@ func (p *Profile) GetInterfaces() (map[string]*dproto.Interface, error) {
 	}
 	p.Debug(result)
 
-	rePo, err := regexp.Compile(`(?msi:\s+Link:(\s+)?\n(?P<ifaces>.+)\n\n\n\s+Agg)`)
+/*	rePo, err := regexp.Compile(`(?msi:(\s+)?Link:(\s+)?\n(?P<ifaces>.+)(\n+)\s+Aggregate)`)
 	if err != nil {
 		return interfaces, fmt.Errorf("Cannot compile port-channel regex: %s", err.Error())
 	}
 	reIfstring, err := regexp.Compile(`(\s+)?(?P<iface>[^\s]+)`)
 	if err != nil {
 		return interfaces, fmt.Errorf("Cannot compile ifstring regex: %s", err.Error())
-	}
+	}*/
 
 	rows := text.ParseTable(result, `Interface\s+`, "", true, false)
 	for _, row := range rows {
@@ -70,14 +79,16 @@ func (p *Profile) GetInterfaces() (map[string]*dproto.Interface, error) {
 				continue
 			}
 			p.Debug(r)
-			out := p.ParseSingle(rePo, r)
+			out := p.ParseSingle(regexps["po"], r)
 			ifaces := strings.Trim(out["ifaces"], " ")
-			ifaces = strings.Replace(ifaces, ".0", "", -1)
+			ifaces = regexps["replace"].ReplaceAllString(ifaces, "")
+			ifaces = regexps["replace_unit"].ReplaceAllString(ifaces, "")
+			//ifaces = strings.Replace(ifaces, ".0", "", -1)
 			ifaces = strings.Replace(ifaces, "\n", "", -1)
 			ifaces = strings.Trim(ifaces, " ")
 
 			if ifaces != "" {
-				out2 := p.ParseMultiple(reIfstring, ifaces)
+				out2 := p.ParseMultiple(regexps["ifstring"], ifaces)
 				members := make([]string, 0)
 				for _, part := range out2 {
 					iface := strings.Trim(part["iface"], " ")
