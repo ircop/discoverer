@@ -4,9 +4,6 @@ import (
 	"fmt"
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes/any"
-	"github.com/ircop/discoverer/profiles/QtechQSW"
-	"github.com/ircop/dproto"
-
 	"github.com/ircop/discoverer/logger"
 	"github.com/ircop/discoverer/profiles/CiscoIOS"
 	"github.com/ircop/discoverer/profiles/DLinkDGS3100"
@@ -15,11 +12,14 @@ import (
 	"github.com/ircop/discoverer/profiles/Huawei/SW"
 	"github.com/ircop/discoverer/profiles/Juniper/JunOS"
 	"github.com/ircop/discoverer/profiles/Mikrotik/RouterOS"
+	"github.com/ircop/discoverer/profiles/QtechQSW"
 	"github.com/ircop/discoverer/profiles/base"
+	"github.com/ircop/dproto"
 	"github.com/ircop/remote-cli"
 	nats "github.com/nats-io/go-nats-streaming"
 	"runtime/debug"
 	"sync"
+	"unicode/utf8"
 )
 
 var sendlock sync.Mutex
@@ -101,7 +101,7 @@ func workerCallback(msg *nats.Msg, chanReplies string) {
 	sw.SetLogger(logger.Log)
 	sw.SetDebugLogger(logger.Debug)
 
-	logger.Log("Starting box discovery for %s...", req.Host)
+	logger.Log("Starting box discovery for %s (request id '%s')...", req.Host, req.RequestID)
 	if err = sw.Init(cli, req.Enable, ""); err != nil {
 		// todo
 		sendError(conn, chanReplies, RequestID, err.Error())
@@ -127,6 +127,7 @@ func workerCallback(msg *nats.Msg, chanReplies string) {
 		response.Errors[dproto.TaskType_INTERFACES.String()] = err.Error()
 		logger.Err("%s: %s: %s", req.Host, dproto.TaskType_INTERFACES.String(), err.Error())
 	}
+
 	ips, err := sw.GetIps()
 	response.Ipifs = ips
 	if err != nil {
@@ -140,6 +141,16 @@ func workerCallback(msg *nats.Msg, chanReplies string) {
 		logger.Err("%s: %s: %s", req.Host, dproto.TaskType_UPLINK.String(), err.Error())
 	}
 	lldp, err := sw.GetLldp()
+	/// validate LLDP data
+	for i := range lldp {
+		if !utf8.Valid([]byte(lldp[i].PortID)) {
+			lldp[i].PortID = ""
+		}
+		if !utf8.Valid([]byte(lldp[i].ChassisID)) {
+			lldp[i].ChassisID = ""
+		}
+	}
+	/// end validate LLDP data
 	response.LldpNeighbors = lldp
 	if err != nil {
 		response.Errors[dproto.TaskType_LLDP.String()] = err.Error()
@@ -158,9 +169,8 @@ func workerCallback(msg *nats.Msg, chanReplies string) {
 		logger.Err("%s: %s: %s", req.Host, dproto.TaskType_CONFIG.String(), err.Error())
 	}
 
-	logger.Log("Done box for %s", req.Host)
+	logger.Log("Done box for %s, sending response id %s", req.Host, response.ReplyID)
 	sendReply(conn, response, chanReplies)
-	//logger.Debug("Should send reply: %+#v\n", response)
 }
 /*
 func workerCallback2(msg *nats.Msg, chanReplies string) {
@@ -308,10 +318,13 @@ func workerCallback2(msg *nats.Msg, chanReplies string) {
 }
 */
 func sendReply(conn nats.Conn, response dproto.BoxResponse, topic string) {
-	logger.Debug("- sending reply... -")
 	bs, err := proto.Marshal(&response)
 	if err != nil {
-		logger.Err("Cannot marshal response for request: %s", err.Error())
+		logger.Err("Cannot marshal response for request: %s\n%+#v\n", err.Error(), response.LldpNeighbors)
+		for i := range response.LldpNeighbors {
+			n := response.LldpNeighbors[i]
+			logger.Err("%+#v", n)
+		}
 		return
 	}
 
