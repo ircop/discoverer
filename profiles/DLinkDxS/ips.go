@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/ircop/dproto"
 	"net"
-	"regexp"
 	"strings"
 )
 

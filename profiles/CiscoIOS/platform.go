@@ -22,21 +22,35 @@ func (p *Profile) GetPlatform() (dproto.Platform, error) {
 	}
 	p.Debug(strings.Replace(result, "%", "%%", -1))
 
-	rePlatform, err := regexp.Compile(`(?:Cisco IOS Software( \[Everest\])?,.*?|IOS \(tm\)) (IOS[\-\s]XE Software,\s)?(?P<platform>.+?) Software \((?P<image>[^)]+)\), (Experimental )?(.+)?Version (?P<version>[^\s,]+)`)
+	patterns := make(map[string]string)
+	patterns["platform"] = `(?:Cisco IOS Software( \[Everest\])?,.*?|IOS \(tm\)) (IOS[\-\s]XE Software,\s)?(?P<platform>.+?) Software \((?P<image>[^)]+)\), (Experimental )?(.+)?Version (?P<version>[^\s,]+)`
+	patterns["serial"] = `(?:Processor board ID (?P<serial>[^\n]+)\n)`
+	patterns["platform2"] = `(?i:Cisco (CISCO)?(?P<platform>[^\s]+) \(.*\) processor)`
+	regexps, err := p.CompileRegexps(patterns)
+	if err != nil {
+		return platform, fmt.Errorf("Cannot compile regexps: %s", err.Error())
+	}
+
+	/*rePlatform, err := regexp.Compile(`(?:Cisco IOS Software( \[Everest\])?,.*?|IOS \(tm\)) (IOS[\-\s]XE Software,\s)?(?P<platform>.+?) Software \((?P<image>[^)]+)\), (Experimental )?(.+)?Version (?P<version>[^\s,]+)`)
 	if err != nil {
 		return platform, fmt.Errorf("Cannot compile rePlatform regex: %s", err.Error())
 	}
 	reSerial, err := regexp.Compile(`(?:Processor board ID (?P<serial>[^\n]+)\n)`)
 	if err != nil {
 		return platform, fmt.Errorf("Cannot compile reSerial regex: %s", err.Error())
-	}
+	}*/
 
-	out := p.ParseSingle(rePlatform, result)
+	out := p.ParseSingle(regexps["platform"], result)
 	platform.Model = strings.Trim(out["platform"], " ")
 	platform.Version = strings.Trim(out["version"], " ")
 
-	out = p.ParseSingle(reSerial, result)
+	out = p.ParseSingle(regexps["serial"], result)
 	platform.Serial = strings.Trim(out["serial"], " ")
+
+	out = p.ParseSingle(regexps["platform2"], result)
+	if out["platform"] != "" {
+		platform.Model = out["platform"]
+	}
 
 	// get mac-addresses on platform
 	macs, err := p.getMacs(platform.Version, platform.Model)
@@ -54,7 +68,7 @@ func (p *Profile) GetPlatform() (dproto.Platform, error) {
 func (p *Profile) getMacs(version string, model string) ([]string, error) {
 	p.Debug("Starting CiscoIOS.GetMacs()")
 
-	macs := make([]string,0)
+	macs := make([]string, 0)
 
 	var count int64
 	firstMac := ""
@@ -120,6 +134,34 @@ func (p *Profile) getMacs(version string, model string) ([]string, error) {
 
 		firstMac = m.String()
 		count = i
+	} else if match, err := regexp.Match(`(760[0-9]|650[0-9])`, []byte(model)); match && err == nil {
+		p.Debug("matched 6500|7600 chassis")
+		result, e := p.Cli.Cmd("show catalyst6000 chassis-mac-addresses")
+		if e != nil {
+			return macs, e
+		}
+		p.Debug(strings.Replace(result, "%", "%%", -1))
+
+		re, e := regexp.Compile(`(?ms:chassis MAC addresses:.+from\s+(?P<from_id>\S+)\s+to\s+(?P<to_id>\S+))`)
+		if e != nil {
+			return macs, fmt.Errorf("Cannot compile 6k regex: %s", err.Error())
+		}
+
+		out := p.ParseSingle(re, result)
+		mFrom := Mac.New(out["from_id"])
+		mTo := Mac.New(out["to_id"])
+		if mFrom == nil || mTo == nil {
+			return macs, fmt.Errorf("Cannot find first or last mac (6k chassis): '%s'/'%s'", out["from_id"], out["to_id"])
+		}
+
+		fromUint := mFrom.Int64()
+		toUint := mTo.Int64()
+		if fromUint == 0 || toUint == 0 || fromUint > toUint {
+			return macs, fmt.Errorf("6k chassis: wrong first/last mac (integers): %d/%d (%s/%s)", fromUint, toUint, mFrom.String(), mTo.String())
+		}
+
+		firstMac = mFrom.String()
+		count = toUint - fromUint + 1
 	} else if match, err := regexp.Match(`S[YXR]`, []byte(version)); match && err == nil {
 		p.Debug("matched 6k chassis")
 		result, e := p.Cli.Cmd("show catalyst6000 chassis-mac-addresses")
