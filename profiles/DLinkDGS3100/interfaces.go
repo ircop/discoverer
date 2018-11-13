@@ -72,5 +72,45 @@ import (
 		interfaces["ch"+gid] = &newInt
 	}
 
+	ipifs, err := p.getIpifs()
+	if err != nil {
+		return interfaces, err
+	}
+	for name, _ := range ipifs {
+		newInt := dproto.Interface{
+			Name:      name,
+			Shortname: name,
+			Type:      dproto.InterfaceType_SVI,
+			LldpID:    name,
+		}
+		interfaces[name] = &newInt
+	}
+
 	return interfaces, nil
+}
+
+func (p *Profile) getIpifs() (map[string]string, error) {
+	ipifs := make(map[string]string)
+
+	result, err := p.Cli.Cmd("show ipif")
+	if err != nil {
+		p.Debug(result)
+		return ipifs, fmt.Errorf("Error getting ipifs: %s", err.Error())
+	}
+	p.Debug(result)
+
+	reIpif, err := regexp.Compile(`(?msi:^Vlan name\s+:\s+(?P<ipif>[^\n]+)\n)`)
+	if err != nil {
+		return ipifs, fmt.Errorf("Failed to compile ipif regex: %s", err.Error())
+	}
+
+	out := p.ParseMultiple(reIpif, result)
+	for _, part := range out {
+		ipif := strings.Trim(part["ipif"], " ")
+		if ipif != "" {
+			ipifs[ipif] = ipif
+		}
+	}
+
+	return ipifs, nil
 }

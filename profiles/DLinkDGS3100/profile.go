@@ -2,9 +2,7 @@ package DLinkDGS3100
 
 import (
 	"github.com/ircop/discoverer/profiles/base"
-	"strings"
 	"github.com/ircop/remote-cli"
-	"fmt"
 )
 
 // Profile instance
@@ -33,7 +31,7 @@ func (p *Profile) Init(cli remote_cli.CliInterface, enable string, community str
 		p.Cli.GlobalTimeout(60)
 		p.Cli.DlinkPagination()
 
-		if err := p.Cli.RegisterErrorPattern(`(Incomplete|Available commands|Next possible completions|Ambiguous token)`, "Syntax error"); err != nil {
+		if err := p.Cli.RegisterErrorPattern(`(Command: |Incomplete|Available commands|Next possible completions|Ambiguous token)`, "Syntax error"); err != nil {
 			return err
 		}
 
@@ -42,7 +40,7 @@ func (p *Profile) Init(cli remote_cli.CliInterface, enable string, community str
 		}
 
 		// Enable admin first if needed
-		if enable != "" {
+		/*if enable != "" {
 			p.Cli.Write([]byte("enable admin"))
 			r, err := p.Cli.ReadUntil(`([Pp]ass[Ww]ord:$)`)
 			if err != nil {
@@ -56,7 +54,7 @@ func (p *Profile) Init(cli remote_cli.CliInterface, enable string, community str
 			if err != nil {
 				return fmt.Errorf("Cannot 'enable admin': %s", err.Error())
 			}
-		}
+		}*/
 	}
 
 	return nil

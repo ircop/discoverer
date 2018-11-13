@@ -27,7 +27,7 @@ func (p *Profile) GetIps() ([]*dproto.Ipif, error) {
 
 	out := p.ParseSingle(re, result)
 	ip := net.ParseIP(out["ip"])
-	mask := net.ParseIP(out["ip"])
+	mask := net.ParseIP(out["mask"])
 	ifname := strings.Trim(out["ifname"], " ")
 	if ip == nil || mask == nil {
 		return addresses, fmt.Errorf("Cannot parpse ip/mask (%s/%s)", out["ip"], out["mask"])

@@ -22,7 +22,7 @@ func (p *Profile) GetVlans() ([]*dproto.Vlan, error) {
 	// REGEX FOR D(G|E)Ss
 	re, err := regexp.Compile(`(?i:^VID\s+:\s+(?P<vlan_id>\d+)\s+VLAN Name\s+:(?P<vlan_name>.*?)\nVLAN Type\s+:\s+(?P<vlan_type>\S+)\s*?(Adv[^\n]+)?\n((VLAN )?Advertisement\s+:\s+\S+\s*\n)?(Member[^\n]+\nStatic[^\n]+\n)?(Current )?Tagged Ports\s*:(\s+)?(?P<tagged_ports>[^\n]+)?\n(Current )?Untagged Ports\s*:(?P<untagged_ports>[^\n]+)?\n)`)
 	// REGEX FOR DXSs
-	re2, err2 := regexp.Compile(`^VID\s+:\s+(?P<vlan_id>\d+)\s+VLAN Name\s+:(?P<vlan_name>.*?)\nVLAN TYPE\s+:[^\n]+\s+UserDefinedPid[^\n]+\s+Encap[^\n]+\s+Member ports\s+:\s+(?P<member_ports>[^\n]+)?\s+Static ports[^\n]+\s+Untagged ports\s+:(\s+)?(?P<untagged_ports>[^\n]+)?\n`)
+	re2, err2 := regexp.Compile(`(?i:^VID\s+:\s+(?P<vlan_id>\d+)\s+VLAN Name\s+:(?P<vlan_name>.*?)\nVLAN TYPE\s+:[^\n]+\s+UserDefinedPid[^\n]+\s+Encap[^\n]+\s+Member ports\s+:\s+(?P<member_ports>[^\n]+)?\s+Static ports[^\n]+\s+Untagged ports\s+:(\s+)?(?P<untagged_ports>[^\n]+)?\n)`)
 	//re2, err :=
 	if err != nil {
 		return vlans, fmt.Errorf("Cannot compile vlan regex: %s", err.Error())
@@ -33,9 +33,10 @@ func (p *Profile) GetVlans() ([]*dproto.Vlan, error) {
 
 	parts := strings.Split(result, "\n\n")
 	for _, part := range parts {
-		part = strings.Trim(part, "\n")
-		//fmt.Printf(part)
+		part = strings.Trim(part, "\n") + "\n"
+
 		out := p.ParseSingle(re, part)
+		p.Debug("----\n%+v\n", out)
 		if len(out) > 1 {
 			vidStr := strings.Trim(out["vlan_id"], " ")
 			name := strings.Trim(out["vlan_name"], " ")
