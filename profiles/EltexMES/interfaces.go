@@ -14,7 +14,8 @@ func (p *Profile) GetInterfaces() (map[string]*dproto.Interface, error) {
 	interfaces := make(map[string]*dproto.Interface)
 
 	patterns := make(map[string]string)
-	patterns["ifs"] = `(?ms:^(?P<ifname>[a-zA-Z]\S+)\s+(?P<oper>Up|Down)\s+(?P<admin>Up|Down|Not Present)\s(?:(?P<desc>.*?)?)?)`
+	//patterns["ifs"] = `(?ms:^(?P<ifname>[a-zA-Z]\S+)\s+(?P<oper>Up|Down)\s+(?P<admin>Up|Down|Not Present)\s(?:(?P<desc>.*?)?)?)`
+	patterns["ifs"] = `(?ms:^(?P<ifname>[a-zA-Z]\S+)\s+(Trunk\s+|Access(\s+)?(\(\d+\))?\s+)?(?P<oper>Up|Down)\s+(?P<admin>Up|Down|Not Present)\s(?:(?P<desc>.*?)?)?)`
 	patterns["members"] = `(?msi:^(?P<ifname>Po\d+)\s+(?P<type1>\S+):\s+(?P<interfaces1>\S+)+(\s+(?P<type2>\S+):\s+(?P<interfaces2>\S+)$|$))`
 	regexps, err := p.CompileRegexps(patterns)
 	if err != nil {
