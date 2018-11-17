@@ -20,7 +20,8 @@ func (p *Profile) GetVlans() ([]*dproto.Vlan, error) {
 	p.Debug(result)
 
 	// REGEX FOR D(G|E)Ss
-	re, err := regexp.Compile(`(?i:^VID\s+:\s+(?P<vlan_id>\d+)\s+VLAN Name\s+:(?P<vlan_name>.*?)\nVLAN Type\s+:\s+(?P<vlan_type>\S+)\s*?(Adv[^\n]+)?\n((VLAN )?Advertisement\s+:\s+\S+\s*\n)?(Member[^\n]+\nStatic[^\n]+\n)?(Current )?Tagged Ports\s*:(\s+)?(?P<tagged_ports>[^\n]+)?\n(Current )?Untagged Ports\s*:(?P<untagged_ports>[^\n]+)?\n)`)
+	//re, err := regexp.Compile(`(?i:^VID\s+:\s+(?P<vlan_id>\d+)\s+VLAN Name\s+:(?P<vlan_name>.*?)\nVLAN Type\s+:\s+(?P<vlan_type>\S+)\s*?(Adv[^\n]+)?\n((VLAN )?Advertisement\s+:\s+\S+\s*\n)?(Member[^\n]+\nStatic[^\n]+\n)?(Current )?Tagged Ports\s*:(\s+)?(?P<tagged_ports>[^\n]+)?\n(Current )?Untagged Ports\s*:(?P<untagged_ports>[^\n]+)?\n)`)
+	re, err := regexp.Compile(`(?i:^VID\s+:\s+(?P<vlan_id>\d+)\s+VLAN Name\s+:(?P<vlan_name>.*?)\nVLAN Type\s+:\s+(?P<vlan_type>\S+)\s*?(Adv[^\n]+)?\n((VLAN )?Advertisement\s+:\s+\S+\s*\n)?(\n)?(Member[^\n]+\n(Static[^\n]+\n)?)?(Current )?Tagged Ports\s*:(\s+)?(?P<tagged_ports>[^\n]+)?\n(Current )?Untagged Ports\s*:(?P<untagged_ports>[^\n]+)?\n)`)
 	// REGEX FOR DXSs
 	re2, err2 := regexp.Compile(`(?i:^VID\s+:\s+(?P<vlan_id>\d+)\s+VLAN Name\s+:(?P<vlan_name>.*?)\nVLAN TYPE\s+:[^\n]+\s+UserDefinedPid[^\n]+\s+Encap[^\n]+\s+Member ports\s+:\s+(?P<member_ports>[^\n]+)?\s+Static ports[^\n]+\s+Untagged ports\s+:(\s+)?(?P<untagged_ports>[^\n]+)?\n)`)
 	//re2, err :=
@@ -35,8 +36,10 @@ func (p *Profile) GetVlans() ([]*dproto.Vlan, error) {
 	for _, part := range parts {
 		part = strings.Trim(part, "\n") + "\n"
 
+		//fmt.Printf("---\n%+v\n", part)
+
 		out := p.ParseSingle(re, part)
-		p.Debug("----\n%+v\n", out)
+		//p.Debug("----\n%+v\n", out)
 		if len(out) > 1 {
 			vidStr := strings.Trim(out["vlan_id"], " ")
 			name := strings.Trim(out["vlan_name"], " ")
@@ -65,6 +68,7 @@ func (p *Profile) GetVlans() ([]*dproto.Vlan, error) {
 
 		out = p.ParseSingle(re2, part)
 		if len(out) > 1 {
+			//p.Debug("---\n%+v\n", out)
 			vidStr := strings.Trim(out["vlan_id"], " ")
 			name := strings.Trim(out["vlan_name"], " ")
 			allStr := strings.Trim(out["member_ports"], " ")
